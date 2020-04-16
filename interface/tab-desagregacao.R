@@ -1,0 +1,80 @@
+
+TabDesagregacao = tabPanel("Desagregacao",
+                           titlePanel(h2("Desagregacao Nao-Parametrica",align="center")),
+                           hr(),
+                           selectInput ("analise_DNP", label = "Local de analise", 
+                                        choices = list ("Estimar" = 1, "Arquivados" = 2),
+                                        selected = "Estimados"),
+                           hr(),
+                           h4("Escolha a serie:"),
+                           conditionalPanel (condition ="input.analise_DNP == 1",
+                            DT::dataTableOutput("SeriesDesagregacao")
+                           ),
+                           conditionalPanel (condition ="input.analise_DNP == 2",
+                                             fluidRow( 
+                                             column(4,fileInput ("serieHArquivada", "Serie historica: ",
+                                                        multiple = TRUE,
+                                                        accept = c ("text/csv",
+                                                                    "text/comma-separated-values,text/plain",
+                                                                    ".csv")
+                                                        )),
+                                             column(4,fileInput ("serieDNPArquivada", "Serie Desagregada: ",
+                                                        multiple = TRUE,
+                                                        accept = c ("text/csv",
+                                                                    "text/comma-separated-values,text/plain",
+                                                                    ".csv")
+                                                        ))
+                                             )
+                          ),
+                           fluidRow( 
+                            column(2,actionButton("SeriesDesagregacao_button","Selecionar",class= "btn-primary")),
+                            column(2,actionButton("limparButton_DNP", "Limpar", class = "btn-primary",style="background-color:#ff0000;border-color: #ff0000"))
+                           ),
+                           br(),br(),
+                           shinyjs::hidden(
+                             div(id = "resultados_DNP",
+                                 tabsetPanel(
+                                    tabPanel("Avaliacoes",
+                                             br(),
+                                             plotOutput("GraficoSerie_DNP"),
+                                             dataTableOutput ("tabelaAvaliacao_DNP")
+                                             ),
+                                    tabPanel("Grafico FAC Anuais",
+                                             br ( ),
+                                             plotOutput("FACAnuais_DNP"),
+                                             dataTableOutput("tabelaAnual_DNP")
+                                             
+                                    ),
+                                    tabPanel("Graficos FAC mensais",
+                                             br ( ),
+                                             selectInput ("lagMensalMAX_DNP", "lag mensal analisado:", choices = 1:12, selected = 1),
+                                             plotOutput ("FACMensais_DNP"),
+                                             dataTableOutput ("tabelaMensal_DNP")
+                                    ),
+                                    tabPanel("Medidas",
+                                             br(),
+                                             verbatimTextOutput("hurst_DNP"),
+                                             p (strong ("Calculo do volume util")),
+                                             fluidRow (
+                                               column (width = 6,
+                                                       sliderInput ("Pregularizacao_DNP", "Porcentagem de regularizacao", min = 0, max = 100, value = 50, width = "100%")
+                                               ),
+                                               column (width = 6,
+                                                       verbatimTextOutput ("volumeUtil_DNP")
+                                               )
+                                             )
+                                             )
+                                 ),
+                                 br()
+                              )
+                           ),
+                          conditionalPanel(condition ="input.analise_DNP == 1",
+                                           actionButton("armazenarBD_DNP","Armazenar",class = "btn-primary"),
+                                           shinyjs::hidden(
+                                             span(id = "armazenando_msg_DNP", "Armazenando..."),
+                                             div(id = "error_armazenar_DNP",
+                                                 div(br(), tags$b("Error: "), span(id = "error_msg_armazenar_DNP"))
+                                             )
+                                           )
+                          )
+)
