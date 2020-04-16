@@ -96,15 +96,10 @@ function (input, output, session) {
   ########## Serie Gerada pelo Modelo PMIX
   
   serieEscolhida = reactive ({
-    if (input$analise == 1) {
       serieS = funcaoAlgoritmo ( )$arqSeries
       if (input$tipo == 2) {
         serieS = serieS[[as.numeric (input$nSerie)]]
       }
-    }
-    else {
-      serieS = leituraSerie ( ) [[as.numeric (input$nSerieA)]]
-    }
     
     return (serieS)
   })
@@ -152,7 +147,7 @@ function (input, output, session) {
     
     output$tabelaMedias = renderDataTable ({
   
-      if ((input$iniciar) || ((input$analise == 2) && (length (input$serieArquivada$datapath) > 0))) {
+      if(input$iniciar){
         MediaHist = apply (serieHist ( ), 2, mean)
         MediaSint = apply (serieEscolhida ( ), 2, mean)
         DesvioHist = apply (serieHist ( ), 2, sd)
@@ -169,8 +164,7 @@ function (input, output, session) {
     
     
     output$tabelaAvaliacao = renderDataTable ({
-      input$analise
-      if ((input$iniciar) && (input$analise == 1)) {
+      if (input$iniciar){
         if (input$tipo == 1) {
           parametros = funcaoAlgoritmo ( )$arqParametros
           
@@ -215,10 +209,6 @@ function (input, output, session) {
           return (datatable (avaliacoes))
         }
       }
-      
-      else if ((input$analise == 2) && (length (input$serieArquivada$datapath) > 0)) {
-        return (datatable (avaliacoes()))
-      }
     })
     
     
@@ -243,7 +233,7 @@ function (input, output, session) {
     
     
     output$GraficoSerie = renderPlot ({
-      if ((input$iniciar) || ((input$analise == 2) && (length (input$serieArquivada$datapath) > 0))) {
+      if (input$iniciar){
         inicializaGraficoSERIE (serieHist ( ))
         graficoSERIE (serieHist ( ), 'cornflowerblue')
         graficoSERIE (serieEscolhida ( ), 'blue')
@@ -252,7 +242,7 @@ function (input, output, session) {
     
     
     output$FACAnuais = renderPlot ({
-      if ((input$iniciar) || ((input$analise == 2) && (length (input$serieArquivada$datapath) > 0))) {
+      if (input$iniciar){
         inicializaGraficoFACANUAL (serieHistAnual ( ), 12)
         graficoFACANUAL (serieHistAnual ( ), 12, 'cornflowerblue')
         graficoFACANUAL (serieEscolhidaAnual ( ), 12, 'blue')
@@ -261,7 +251,7 @@ function (input, output, session) {
     
     
     output$tabelaAnual = renderDataTable ({
-      if ((input$iniciar) || ((input$analise == 2) && (length (input$serieArquivada$datapath) > 0))) {
+      if (input$iniciar){
         facAnual = data.frame (as.vector (autocorrelacaoAnual (serieEscolhidaAnual ( ), 12)[-1]))
         rownames (facAnual) = paste ("lag", 1:12)
         datatable (facAnual, colnames = NULL)
@@ -270,7 +260,7 @@ function (input, output, session) {
     
     
     output$FACMensais = renderPlot ({
-      if ((input$iniciar) || ((input$analise == 2) && (length (input$serieArquivada$datapath) > 0))) {
+      if (input$iniciar){
         inicializaGraficoMENSAL (serieHist ( ), as.numeric (input$lagMensalMAX))
         graficoFACMENSAL (serieHist ( ), as.numeric (input$lagMensalMAX), 'cornflowerblue')
         graficoFACMENSAL (serieEscolhida ( ), as.numeric (input$lagMensalMAX), 'blue')
@@ -279,7 +269,7 @@ function (input, output, session) {
     
     
     output$tabelaMensal = renderDataTable ({
-      if ((input$iniciar) || ((input$analise == 2) && (length (input$serieArquivada$datapath) > 0))) {
+      if (input$iniciar){
         facMensal = data.frame (autocorrelacaoMensal (serieEscolhida ( ), 12)[-1, ])
         colnames (facMensal) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
         rownames (facMensal) = paste ("lag", 1:12)
@@ -292,23 +282,17 @@ function (input, output, session) {
       if(input$iniciar){
         print ("Serie historica")
         print (paste (volumeUtil (serieHist ( ), (input$Pregularizacao/100), TRUE), "m^3"))
-      }
-      
-      if ((input$iniciar) || ((input$analise == 2) && (length (input$serieArquivada$datapath) > 0))) {
         print ("Serie sintetica")
         print (paste (volumeUtil (serieEscolhida ( ), (input$Pregularizacao/100), TRUE), "m^3"))
       }
     })
-    
+      
     
     output$hurst = renderPrint ({
       
       if(input$iniciar){
         print ("Serie historica")
         print (isolate (Hurst (as.vector (serieHist ( )))))
-      }
-      
-      if ((input$iniciar) || ((input$analise == 2) && (length (input$serieArquivada$datapath) > 0))) {
         print ("Serie sintetica")
         print ((Hurst (as.vector (serieEscolhida ( )))))
       }
@@ -379,14 +363,12 @@ function (input, output, session) {
     shinyjs::hide("error_armazenar")
     
     tryCatch({ 
-      if (input$analise == 1) {
         serieArmazenar = funcaoAlgoritmo ( )$arqSeries
         if (input$tipo == 2) {
           serieArmazenar = serieArmazenar[[as.numeric (input$nSerie)]]
         }
         
         serieArmazenarAnual = apply (serieEscolhida ( ), 1, sum)
-        
         
         #Tabela Avaliacao
         MediaArmazenar = (apply (serieArmazenar, 2, mean))
@@ -426,7 +408,6 @@ function (input, output, session) {
         inserirACF_ANUALSS(idSERIE_SINTETICA,acfAnual)
         inserirSomHurstVol(idSERIE_SINTETICA,somReSint,HurstAnualArmazenar,HurstMensalArmazenar,volumeArmazenar)
         shinyalert("Armazenado!","A serie foi armazenada com sucesso", type = "success")
-      }
       
     },
     error = function(err) {
@@ -468,7 +449,7 @@ function (input, output, session) {
   })
   
   observe({
-    if ((input$iniciar) && (input$analise == 1)){
+    if (input$iniciar){
       if (input$tipo == 1){
         shinyjs::hide("plotly_avaliacoes")
       }else{
