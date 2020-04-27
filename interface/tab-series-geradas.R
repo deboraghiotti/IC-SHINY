@@ -20,7 +20,9 @@ TabSerieGeradas = tabPanel("Series Geradas",
                                               shinyjs::hidden(
                                                 div(
                                                   id="grafico_ss_panel",
-                                                  plotOutput("GraficoSS")
+                                                  plotOutput("GraficoSS"),
+                                                  DT::dataTableOutput('Avaliacao_SS_Table'),
+                                                  downloadButton ("downloadAvaliacoes_Gerada", "Download Avaliacoes", icon ("save"))
                                                 ) 
                                               )
                                      ),
@@ -29,7 +31,8 @@ TabSerieGeradas = tabPanel("Series Geradas",
                                               shinyjs::hidden(
                                                 div(
                                                   id="acf_mensal_ss_panel",
-                                                  DT::dataTableOutput('AcfMensal_SS_Table')
+                                                  DT::dataTableOutput('AcfMensal_SS_Table'),
+                                                  downloadButton ("downloadTabelaMensal_Gerada", "Download FAC Mensal", icon ("save"))
                                                 ) 
                                               )
                                      ),
@@ -38,7 +41,8 @@ TabSerieGeradas = tabPanel("Series Geradas",
                                               shinyjs::hidden(
                                                 div(
                                                   id="acf_anual_ss_panel",
-                                                  DT::dataTableOutput('AcfAnual_SS_Table')
+                                                  DT::dataTableOutput('AcfAnual_SS_Table'),
+                                                  downloadButton ("downloadTabelaAnual_Gerada", "Download FAC Anual", icon ("save"))
                                                 ) 
                                               )
                                      ),
@@ -48,15 +52,6 @@ TabSerieGeradas = tabPanel("Series Geradas",
                                                 div(
                                                   id="hurst_ss_panel",
                                                   DT::dataTableOutput('Hurst_SS_Table')
-                                                ) 
-                                              )
-                                     ),
-                                     tabPanel("Avaliacoes",
-                                              br(),
-                                              shinyjs::hidden(
-                                                div(
-                                                  id="avaliacao_ss_panel",
-                                                  DT::dataTableOutput('Avaliacao_SS_Table')
                                                 ) 
                                               )
                                      ),
@@ -79,6 +74,9 @@ TabSerieGeradas = tabPanel("Series Geradas",
                                               )
                                      )              
                                    ),
+                                   hr(),
+                                   downloadButton ("downloadSerie_Gerada", "Download Serie", icon ("save")),
+                                   hr(),
                                    fluidRow(
                                      column(12,
                                             actionButton("limpar_ss_button", "   Limpar   ", class = "btn-primary"),
@@ -96,12 +94,23 @@ TabSerieGeradas = tabPanel("Series Geradas",
                              shinyjs::hidden(
                                div(id = "sd_resultados",
                                    tabsetPanel(
+                                     tabPanel("Avaliacoes",
+                                              br(),
+                                              shinyjs::hidden(
+                                                div(
+                                                  id="avaliacao_sd_panel",
+                                                  DT::dataTableOutput('Avaliacao_SD_Table'),
+                                                  downloadButton ("downloadAvaliacoes_Gerada_SD", "Download Avaliacoes", icon ("save"))
+                                                ) 
+                                              )
+                                     ),
                                      tabPanel("ACF MENSAL",
                                               br(),
                                               shinyjs::hidden(
                                                 div(
                                                   id="acf_mensal_sd_panel",
-                                                  DT::dataTableOutput('AcfMensal_SD_Table')
+                                                  DT::dataTableOutput('AcfMensal_SD_Table'),
+                                                  downloadButton ("downloadTabelaMensal_Gerada_SD", "Download FAC Mensal", icon ("save"))
                                                 ) 
                                               )
                                      ),
@@ -110,7 +119,8 @@ TabSerieGeradas = tabPanel("Series Geradas",
                                               shinyjs::hidden(
                                                 div(
                                                   id="acf_anual_sd_panel",
-                                                  DT::dataTableOutput('AcfAnual_SD_Table')
+                                                  DT::dataTableOutput('AcfAnual_SD_Table'),
+                                                  downloadButton ("downloadTabelaAnual_Gerada_SD", "Download FAC Anual", icon ("save"))
                                                 ) 
                                               )
                                      ),
@@ -120,15 +130,6 @@ TabSerieGeradas = tabPanel("Series Geradas",
                                                 div(
                                                   id="hurst_sd_panel",
                                                   DT::dataTableOutput('Hurst_SD_Table')
-                                                ) 
-                                              )
-                                     ),
-                                     tabPanel("Avaliacoes",
-                                              br(),
-                                              shinyjs::hidden(
-                                                div(
-                                                  id="avaliacao_sd_panel",
-                                                  DT::dataTableOutput('Avaliacao_SD_Table')
                                                 ) 
                                               )
                                      ),
@@ -151,6 +152,9 @@ TabSerieGeradas = tabPanel("Series Geradas",
                                               )
                                      )              
                                    ),
+                                   hr(),
+                                   downloadButton ("downloadSerie_Gerada_SD", "Download Serie", icon ("save")),
+                                   hr(),
                                    actionButton("limpar_sd_button", "Limpar", class = "btn-primary")
                                )
                              )
