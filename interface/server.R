@@ -674,39 +674,107 @@ function (input, output, session) {
     selectedrowindex <<- input$SeriesSinteticas_rows_selected[length(input$SeriesSinteticas_rows_selected)]
     selectedrowindex <<- as.numeric(selectedrowindex)
     idSerieSintetica <- (SSTable[selectedrowindex,ID])
+    nomeEstacao <- SSTable[selectedrowindex,Estacao]
+    
+    serieHistorica <- valorSH('',nomeEstacao)
+    serieSintetica = selectSerie_Sintetica(idSerieSintetica)
     
     print(selectedrowindex)
     print(idSerieSintetica)
     
-        shinyjs::show("ss_resultados")
-        shinyjs::show("grafico_ss_panel")
-        output$GraficoSS = renderPlot ({
-          nomeEstacao <- SSTable[selectedrowindex,Estacao]
-            serieHistorica <- valorSH('',nomeEstacao)
-            inicializaGraficoSERIE (serieHistorica)
-            graficoSERIE (selectSerie_Sintetica(idSerieSintetica), 'cornflowerblue')
-            graficoSERIE (serieHistorica, 'blue')
+    shinyjs::show("ss_resultados")
+    shinyjs::show("grafico_ss_panel")
+    output$GraficoSS = renderPlot ({
+      inicializaGraficoSERIE (serieHistorica)
+      graficoSERIE (serieSintetica, 'cornflowerblue')
+      graficoSERIE (serieHistorica, 'blue')
             
 
-        })
+    })
       
         shinyjs::show("acf_mensal_ss_panel")
-        output$AcfMensal_SS_Table <- DT::renderDataTable(buscarACF_MENSAL_SS(idSerieSintetica))
+        acfMensal = buscarACF_MENSAL_SS(idSerieSintetica)
+        output$AcfMensal_SS_Table <- DT::renderDataTable(acfMensal)
       
         shinyjs::show("acf_anual_ss_panel")
-        output$AcfAnual_SS_Table <- DT::renderDataTable(buscarACF_ANUAL_SS(idSerieSintetica))
+        acfAnual <- buscarACF_ANUAL_SS(idSerieSintetica)
+        output$AcfAnual_SS_Table <- DT::renderDataTable(acfAnual)
       
         shinyjs::show("hurst_ss_panel")
         output$Hurst_SS_Table <- DT::renderDataTable(buscarHURST_SS(idSerieSintetica))
       
-        shinyjs::show("avaliacao_ss_panel")
-        output$Avaliacao_SS_Table <- DT::renderDataTable(buscarAVALIACAO_SS(idSerieSintetica))
+        #shinyjs::show("avaliacao_ss_panel")
+        avaliacoes <- buscarAVALIACAO_SS(idSerieSintetica)
+        output$Avaliacao_SS_Table <- DT::renderDataTable(avaliacoes)
       
         shinyjs::show("volume_ss_panel")
         output$Volume_SS_Table <- DT::renderDataTable(buscarVOLUME_SS(idSerieSintetica))
       
         shinyjs::show("soma_ss_panel")
         output$Soma_SS_Table <- DT::renderDataTable(buscarSOMARESIDUAL_SS(idSerieSintetica))
+        
+        output$downloadSerie_Gerada = downloadHandler (
+          filename = function ( ) {
+            paste("serieSintetica.csv",sep="")
+          },
+          content = function (file) {
+            colunas = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
+            write.table(data.frame (serieSintetica), file,
+                        col.names = colunas,
+                        row.names = F,
+                        sep = ";",
+                        dec = ",")
+          }
+        )
+        
+        output$downloadAvaliacoes_Gerada = downloadHandler (
+          filename = function ( ) {
+            paste("serieAvaliacoes.csv",sep="")
+          },
+          content = function (file) {
+            MediaSint = avaliacoes[,2]
+            DesvioSint = avaliacoes[,3]
+            KurtSint = avaliacoes[,5]
+            AssimetriaSint = avaliacoes[,4]
+            CoefVarSint = avaliacoes[,6]
+            medidas = data.frame (MediaSint,DesvioSint,KurtSint,AssimetriaSint,CoefVarSint)
+            rownames (medidas) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
+            colnames (medidas) = c ("Media", "Desvio-padrao","Indice Kurt","Assimetria","Coeficiente de Variacao")
+            write.table(medidas, file,
+                        sep = ";",
+                        dec = ",",
+                        row.names = T,
+                        col.names = NA)
+          }
+        )
+        
+        output$downloadTabelaAnual_Gerada = downloadHandler (
+          filename = function ( ) {
+            paste0 ("serieFACAnual", ".csv")
+          },
+          content = function (file) {
+            tabela = data.frame (acfAnual$VALOR)
+            colnames (tabela) = c (("FAC"))
+            rownames (tabela) = c (paste ("lag", 1:12))
+            write.table (tabela, file, col.names = NA, row.names = T,
+                         sep = ";",
+                         dec = ",")
+          }
+        )
+        
+        output$downloadTabelaMensal_Gerada = downloadHandler (
+          filename = function ( ) {
+            paste0 ("serieFACMensal", ".csv")
+          },
+          content = function (file) {
+            tabela = data.frame (acfMensal[,2:13])
+            colnames (tabela) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
+            rownames (tabela) = c (paste ("lag", 1:12))
+            write.table (tabela, file, col.names = NA, row.names = T,
+                         sep = ";",
+                         dec = ",")
+          }
+        )
         
     
   })
@@ -741,25 +809,93 @@ function (input, output, session) {
     
     print(selectedrowindex)
     print(idSerieDesagregada)
+    
+    serieDesagregada = selectSerie_Desagregada(idSerieDesagregada)
   
-      shinyjs::show("sd_resultados")
-        shinyjs::show("acf_mensal_sd_panel")
-        output$AcfMensal_SD_Table <- DT::renderDataTable(buscarACF_MENSAL_SD(idSerieDesagregada))
+    shinyjs::show("sd_resultados")
+    shinyjs::show("acf_mensal_sd_panel")
+    acfMensal_sd = buscarACF_MENSAL_SD(idSerieDesagregada)
+    output$AcfMensal_SD_Table <- DT::renderDataTable(acfMensal_sd)
       
-        shinyjs::show("acf_anual_sd_panel")
-        output$AcfAnual_SD_Table <- DT::renderDataTable(buscarACF_ANUAL_SD(idSerieDesagregada))
+    shinyjs::show("acf_anual_sd_panel")
+    acfAnual_sd = buscarACF_ANUAL_SD(idSerieDesagregada)
+    output$AcfAnual_SD_Table <- DT::renderDataTable(acfAnual_sd)
       
-        shinyjs::show("hurst_sd_panel")
-        output$Hurst_SD_Table <- DT::renderDataTable(buscarHURST_SD(idSerieDesagregada))
+    shinyjs::show("hurst_sd_panel")
+    output$Hurst_SD_Table <- DT::renderDataTable(buscarHURST_SD(idSerieDesagregada))
 
-        shinyjs::show("avaliacao_sd_panel")
-        output$Avaliacao_SD_Table <- DT::renderDataTable(buscarAVALIACAO_SD(idSerieDesagregada))
+    shinyjs::show("avaliacao_sd_panel")
+    avaliacoes_sd = buscarAVALIACAO_SD(idSerieDesagregada)
+    output$Avaliacao_SD_Table <- DT::renderDataTable(avaliacoes_sd)
       
-        shinyjs::show("volume_sd_panel")
-        output$Volume_SD_Table <- DT::renderDataTable(buscarVOLUME_SD(idSerieDesagregada))
+    shinyjs::show("volume_sd_panel")
+    output$Volume_SD_Table <- DT::renderDataTable(buscarVOLUME_SD(idSerieDesagregada))
       
-        shinyjs::show("soma_sd_panel")
-        output$Soma_SD_Table <- DT::renderDataTable(buscarSOMARESIDUAL_SD(idSerieDesagregada))
+    shinyjs::show("soma_sd_panel")
+    output$Soma_SD_Table <- DT::renderDataTable(buscarSOMARESIDUAL_SD(idSerieDesagregada))
+        
+    output$downloadSerie_Gerada_SD = downloadHandler (
+      filename = function ( ) {
+        paste("serieDesagregada.csv",sep="")
+      },
+      content = function (file) {
+        colunas = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
+        write.table(data.frame (serieDesagregada), file,
+                    col.names = colunas,
+                    row.names = F,
+                    sep = ";",
+                    dec = ",")
+      }
+    )
+    
+    output$downloadAvaliacoes_Gerada_SD = downloadHandler (
+      filename = function ( ) {
+        paste("serieAvaliacoes.csv",sep="")
+      },
+      content = function (file) {
+        MediaSint = avaliacoes_sd[,2]
+        DesvioSint = avaliacoes_sd[,3]
+        KurtSint = avaliacoes_sd[,5]
+        AssimetriaSint = avaliacoes_sd[,4]
+        CoefVarSint = avaliacoes_sd[,6]
+        medidas = data.frame (MediaSint,DesvioSint,KurtSint,AssimetriaSint,CoefVarSint)
+        rownames (medidas) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
+        colnames (medidas) = c ("Media", "Desvio-padrao","Indice Kurt","Assimetria","Coeficiente de Variacao")
+        write.table(medidas, file,
+                    sep = ";",
+                    dec = ",",
+                    row.names = T,
+                    col.names = NA)
+      }
+    )
+    
+    output$downloadTabelaMensal_Gerada_SD = downloadHandler (
+      filename = function ( ) {
+        paste0 ("serieFACMensal", ".csv")
+      },
+      content = function (file) {
+        tabela = data.frame (acfMensal_sd[,2:13])
+        colnames (tabela) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
+        rownames (tabela) = c (paste ("lag", 1:12))
+        write.table (tabela, file, col.names = NA, row.names = T,
+                     sep = ";",
+                     dec = ",")
+      }
+    )
+    
+    output$downloadTabelaAnual_Gerada_SD = downloadHandler (
+      filename = function ( ) {
+        paste0 ("serieFACAnual", ".csv")
+      },
+      content = function (file) {
+        tabela = data.frame (acfAnual_sd$VALOR)
+        colnames (tabela) = c (("FAC"))
+        rownames (tabela) = c (paste ("lag", 1:12))
+        write.table (tabela, file, col.names = NA, row.names = T,
+                     sep = ";",
+                     dec = ",")
+      }
+    )
     
         
   })

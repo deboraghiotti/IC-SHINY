@@ -730,6 +730,14 @@ WHERE ID_ESTACAO = IDESTACAO;")
     }
   }
   
+  selectSerie_Desagregada = function(id_DESAGREGADO){
+    if(!is.null(id_DESAGREGADO)){
+      query <- paste("SELECT JAN, FEV,MAR,ABR,MAI,JUN,JUL,AGO,SEB,OUB,NOV,DEZ FROM SERIE WHERE id_DESAGREGADO = ",id_DESAGREGADO)
+      serie <- alterDataBase(query)
+      return(serie)
+    }
+  }
+  
   deleteSerieSS =  function(idSerie_Sintetica){
     if(!is.null(idSerie_Sintetica)){
       query = paste("DELETE FROM SERIE_SINTETICA WHERE idSERIE_SINTETICA = ",idSerie_Sintetica)
@@ -914,7 +922,7 @@ WHERE ID_ESTACAO = IDESTACAO;")
   # o idDESAGREGADO dessa nova serie na table serie_sintetica do banco de dados
   # Parametros de entrada: 
   # > idSerie_Sintetica = o id da serie sintetica que foi desagregada 
-  # > parametrico: 'S' ou 'N' indicando se a serie é parametrica(S) ou nao-parametrica(N)
+  # > parametrico: 'S' ou 'N' indicando se a serie ? parametrica(S) ou nao-parametrica(N)
   
   registrarSSDESAGREGACAO <- function(idSerie_Sintetica,parametrico){
     db <- dbConnect(MySQL(),
