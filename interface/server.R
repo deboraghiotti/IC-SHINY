@@ -155,7 +155,7 @@ function (input, output, session) {
         KurtSint = apply(serieEscolhida(),2,kurtosis)
         AssimetriaSint = apply(serieEscolhida(),2,skewness)
         CoefVarSint = DesvioSint/MediaSint
-        medidas = data.frame (MediaHist, MediaSint, DesvioHist, DesvioSint,KurtSint,AssimetriaSint,CoefVarSint)
+        medidas = round(data.frame (MediaHist, MediaSint, DesvioHist, DesvioSint,KurtSint,AssimetriaSint,CoefVarSint),digits = 5)
         rownames (medidas) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
         colnames (medidas) = c ("Media Historica", "Media Sintetica", "Desvio-padrao Historico", "Desvio-padrao Sintetico","Indice Kurt","Assimetria","Coeficiente de Variacao")
         datatable (medidas)
@@ -270,7 +270,7 @@ function (input, output, session) {
     
     output$tabelaMensal = renderDataTable ({
       if (input$iniciar){
-        facMensal = data.frame (autocorrelacaoMensal (serieEscolhida ( ), 12)[-1, ])
+        facMensal = round(data.frame (autocorrelacaoMensal (serieEscolhida ( ), 12)[-1, ]),digits = 4)
         colnames (facMensal) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
         rownames (facMensal) = paste ("lag", 1:12)
         datatable (facMensal)
@@ -308,14 +308,36 @@ function (input, output, session) {
     
     output$downloadSerie = downloadHandler (
       filename = function ( ) {
-        paste0 ("serie_", input$nSerie, ".csv")
+        paste("serie_", input$nSerie, ".csv",sep="")
       },
       content = function (file) {
-        write.table (data.frame (serieEscolhida ( )), file,
-                     col.names = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"),
-                     row.names = F,
-                     sep = input$sep,
-                     dec = input$dec)
+        colunas = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
+        write.table(data.frame (serieEscolhida ( )), file,
+                    col.names = colunas,
+                    row.names = F,
+                    sep = ";",
+                    dec = ",")
+      }
+    )
+    
+    output$downloadAvaliacoes = downloadHandler (
+      filename = function ( ) {
+        paste("serie_", input$nSerie, "Avaliacoes.csv",sep="")
+      },
+      content = function (file) {
+        MediaSint = apply (serieEscolhida ( ), 2, mean)
+        DesvioSint = apply (serieEscolhida ( ), 2, sd)
+        KurtSint = apply(serieEscolhida(),2,kurtosis)
+        AssimetriaSint = apply(serieEscolhida(),2,skewness)
+        CoefVarSint = DesvioSint/MediaSint
+        medidas = data.frame (MediaSint,DesvioSint,KurtSint,AssimetriaSint,CoefVarSint)
+        rownames (medidas) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
+        colnames (medidas) = c ("Media", "Desvio-padrao","Indice Kurt","Assimetria","Coeficiente de Variacao")
+        write.table(medidas, file,
+                    sep = ";",
+                    dec = ",",
+                    row.names = T,
+                    col.names = NA)
       }
     )
     
@@ -329,8 +351,8 @@ function (input, output, session) {
         colnames (tabela) = c (("FAC"))
         rownames (tabela) = c (paste ("lag", 0:12))
         write.table (tabela, file, col.names = NA, row.names = T,
-                     sep = input$sep,
-                     dec = input$dec)
+                     sep = ";",
+                     dec = ",")
       }
     )
     
@@ -344,8 +366,8 @@ function (input, output, session) {
         colnames (tabela) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
         rownames (tabela) = c (paste ("lag", 0:12))
         write.table (tabela, file, col.names = NA, row.names = T,
-                     sep = input$sep,
-                     dec = input$dec)
+                     sep = ";",
+                     dec = ",")
       }
     )
     
@@ -885,6 +907,54 @@ function (input, output, session) {
       print (somaRes_ARMA())
     })
     
+    output$downloadSerie_ARMA = downloadHandler (
+      filename = function ( ) {
+        paste("serieARMA.csv",sep="")
+      },
+      content = function (file) {
+        write.table(data.frame (serieSint_ARMA()), file,
+                    col.names = "Serie Anual",
+                    row.names = F,
+                    sep = ";",
+                    dec = ",")
+      }
+    )
+    
+    output$downloadTabelaAnual_ARMA = downloadHandler (
+      filename = function ( ) {
+        paste0 ("serieARMA_FACAnual", ".csv")
+      },
+      content = function (file) {
+        tabela = data.frame (acfAnual_ARMA())
+        colnames (tabela) = c (("FAC"))
+        rownames (tabela) = c (paste ("lag", 1:12))
+        write.table (tabela, file, col.names = NA, row.names = T,
+                     sep = ";",
+                     dec = ",")
+      }
+    )
+    
+    output$downloadAvaliacoes_ARMA = downloadHandler (
+      filename = function ( ) {
+        paste("serieARMA_Avaliacoes.csv",sep="")
+      },
+      content = function (file) {
+        
+        Media_ARMA = avaliacoes_ARMA()$Media
+        Desvio_ARMA = avaliacoes_ARMA()$Dp
+        Kurt_ARMA = avaliacoes_ARMA()$Kurt
+        Assimetria_ARMA = avaliacoes_ARMA()$Assimetria
+        CoefVar_ARMA = avaliacoes_ARMA()$Coef_Var
+        medidas = data.frame (Media_ARMA,Desvio_ARMA,Kurt_ARMA,Assimetria_ARMA,CoefVar_ARMA)
+        colnames (medidas) = c ("Media", "Desvio-padrao","Indice Kurt","Assimetria","Coeficiente de Variacao")
+        write.table(medidas, file,
+                    sep = ";",
+                    dec = ",",
+                    row.names = T,
+                    col.names = NA)
+      }
+    )
+    
   })
   
   observeEvent(input$limparButton_ARMA,{
@@ -1090,7 +1160,7 @@ function (input, output, session) {
     
     
     output$tabelaMensal_DNP = renderDataTable ({
-        facMensal = data.frame (autocorrelacaoMensal (desagregadoNP, 12)[-1, ])
+        facMensal = round(data.frame (autocorrelacaoMensal (desagregadoNP, 12)[-1, ]),digits = 5)
         colnames (facMensal) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
         rownames (facMensal) = paste ("lag", 1:12)
         datatable (facMensal)
@@ -1104,6 +1174,69 @@ function (input, output, session) {
         print (paste (volumeUtil (as.matrix(desagregadoNP), (input$Pregularizacao_DNP/100), TRUE), "m^3"))
 
     })
+    
+    output$downloadSerie_DNP = downloadHandler (
+      filename = function ( ) {
+        paste("serieDNP.csv",sep="")
+      },
+      content = function (file) {
+        colunas = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
+        write.table(data.frame (desagregadoNP), file,
+                    col.names = colunas,
+                    row.names = F,
+                    sep = ";",
+                    dec = ",")
+      }
+    )
+    
+    output$downloadAvaliacoes_DNP = downloadHandler (
+      filename = function ( ) {
+        paste("serieDNP_Avaliacoes.csv",sep="")
+      },
+      content = function (file) {
+        MediaSint = apply (desagregadoNP, 2, mean)
+        DesvioSint = apply (desagregadoNP, 2, sd)
+        KurtSint = apply(desagregadoNP,2,kurtosis)
+        AssimetriaSint = apply(desagregadoNP,2,skewness)
+        CoefVarSint = DesvioSint/MediaSint
+        medidas = data.frame (MediaSint,DesvioSint,KurtSint,AssimetriaSint,CoefVarSint)
+        rownames (medidas) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
+        colnames (medidas) = c ("Media", "Desvio-padrao","Indice Kurt","Assimetria","Coeficiente de Variacao")
+        write.table(medidas, file,
+                    sep = ";",
+                    dec = ",",
+                    row.names = T,
+                    col.names = NA)
+      }
+    )
+    
+    output$downloadTabelaAnual_DNP = downloadHandler (
+      filename = function ( ) {
+        paste0 ("serieDNP_FACAnual", ".csv")
+      },
+      content = function (file) {
+        tabela = data.frame (autocorrelacaoAnual (apply (desagregadoNP, 1, sum), 12))
+        colnames (tabela) = c (("FAC"))
+        rownames (tabela) = c (paste ("lag", 0:12))
+        write.table (tabela, file, col.names = NA, row.names = T,
+                     sep = ";",
+                     dec = ",")
+      }
+    )
+    
+    output$downloadTabelaMensal_DNP = downloadHandler (
+      filename = function ( ) {
+        paste0 ("serieDNP_FACMensal", ".csv")
+      },
+      content = function (file) {
+        tabela = data.frame (autocorrelacaoMensal (desagregadoNP, 12))
+        colnames (tabela) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
+        rownames (tabela) = c (paste ("lag", 0:12))
+        write.table (tabela, file, col.names = NA, row.names = T,
+                     sep = ";",
+                     dec = ",")
+      }
+    )
     
     
   })

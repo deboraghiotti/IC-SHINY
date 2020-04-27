@@ -6,6 +6,11 @@ TabDesagregacao = tabPanel("Desagregacao",
                                         choices = list ("Estimar" = 1, "Arquivados" = 2),
                                         selected = "Estimados"),
                            hr(),
+                           radioButtons ("tipoDesagregacao", label = h4("Estimacao de parametros"),
+                                         choices = list ("Parametrica" = 1,
+                                                         "Nao-Parametrica" = 2), 
+                                         selected = 1,inline=TRUE),
+                           hr(),
                            h4("Escolha a serie:"),
                            conditionalPanel (condition ="input.analise_DNP == 1",
                             DT::dataTableOutput("SeriesDesagregacao")
@@ -37,19 +42,22 @@ TabDesagregacao = tabPanel("Desagregacao",
                                     tabPanel("Avaliacoes",
                                              br(),
                                              plotOutput("GraficoSerie_DNP"),
-                                             dataTableOutput ("tabelaAvaliacao_DNP")
+                                             dataTableOutput ("tabelaAvaliacao_DNP"),
+                                             downloadButton ("downloadAvaliacoes_DNP", "Download Avaliacoes", icon ("save"))
                                              ),
                                     tabPanel("Grafico FAC Anuais",
                                              br ( ),
                                              plotOutput("FACAnuais_DNP"),
-                                             dataTableOutput("tabelaAnual_DNP")
+                                             dataTableOutput("tabelaAnual_DNP"),
+                                             downloadButton ("downloadTabelaAnual_DNP", "Download Tabela Anual", icon ("save"))
                                              
                                     ),
                                     tabPanel("Graficos FAC mensais",
                                              br ( ),
                                              selectInput ("lagMensalMAX_DNP", "lag mensal analisado:", choices = 1:12, selected = 1),
                                              plotOutput ("FACMensais_DNP"),
-                                             dataTableOutput ("tabelaMensal_DNP")
+                                             dataTableOutput ("tabelaMensal_DNP"),
+                                             downloadButton ("downloadTabelaMensal_DNP", "Download Tabela Mensal", icon ("save"))
                                     ),
                                     tabPanel("Medidas",
                                              br(),
@@ -65,10 +73,12 @@ TabDesagregacao = tabPanel("Desagregacao",
                                              )
                                              )
                                  ),
-                                 br()
+                                 hr(),
+                                 downloadButton ("downloadSerie_DNP", "Download Serie", icon ("save"))
                               )
                            ),
                           conditionalPanel(condition ="input.analise_DNP == 1",
+                                           br(),
                                            actionButton("armazenarBD_DNP","Armazenar",class = "btn-primary"),
                                            shinyjs::hidden(
                                              span(id = "armazenando_msg_DNP", "Armazenando..."),

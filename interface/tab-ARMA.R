@@ -35,7 +35,8 @@ TabARMA = tabPanel("Modelo ARMA",
                      tabPanel("Graficos FAC anuais",
                               br(),
                               plotOutput ("GraficoSerie_ARMA"),
-                              dataTableOutput("tabelaAnual_ARMA")
+                              dataTableOutput("tabelaAnual_ARMA"),
+                              downloadButton ("downloadTabelaAnual_ARMA", "Download Tabela Anual", icon ("save"))
                      ),
                      
                      tabPanel("Avaliacao",
@@ -44,7 +45,8 @@ TabARMA = tabPanel("Modelo ARMA",
                               dataTableOutput("tabelaAvaliacaoHist_ARMA"),
                               hr(),
                               h4 (strong ("Tabela de Avaliacoes Sintetica")),
-                              dataTableOutput("tabelaAvaliacao_ARMA")
+                              dataTableOutput("tabelaAvaliacao_ARMA"),
+                              downloadButton ("downloadAvaliacoes_ARMA", "Download Avaliacoes", icon ("save"))
                               
                      ),
                      tabPanel("Medidas",
@@ -67,7 +69,9 @@ TabARMA = tabPanel("Modelo ARMA",
                               p (strong ("Soma Residual")),
                               verbatimTextOutput ("somaRes_ARMA")
                      )
-                   )
+                   ),
+                   hr(),
+                   downloadButton ("downloadSerie_ARMA", "Download Serie", icon ("save"))
                )
              )
            )

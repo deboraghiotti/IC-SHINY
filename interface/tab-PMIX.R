@@ -84,20 +84,21 @@ TabPMIX = tabPanel ("Modelo PMIX",
                       tabPanel("Graficos series",
                                br ( ),
                                plotOutput("GraficoSerie"),
-                               dataTableOutput("tabelaMedias")
+                               dataTableOutput("tabelaMedias"),
+                               downloadButton ("downloadAvaliacoes", "Download Avaliacoes", icon ("save"))
                       ),
                       tabPanel("Graficos FAC anuais",
                                br ( ),
                                plotOutput("FACAnuais"),
                                dataTableOutput("tabelaAnual"),
-                               downloadButton ("downloadTabelaAnual", "Download", icon ("save"))
+                               downloadButton ("downloadTabelaAnual", "Download FAC Anual", icon ("save"))
                       ),
                       tabPanel("Graficos FAC mensais",
                                br ( ),
                                selectInput ("lagMensalMAX", "lag mensal analisado:", choices = 1:12, selected = 1),
                                plotOutput ("FACMensais"),
                                dataTableOutput ("tabelaMensal"),
-                               downloadButton ("downloadTabelaMensal", "Download", icon ("save"))
+                               downloadButton ("downloadTabelaMensal", "Download FAC Mensal", icon ("save"))
                       ),
                       tabPanel("Medidas",
                                br ( ),
@@ -118,7 +119,7 @@ TabPMIX = tabPanel ("Modelo PMIX",
                     hr(),
                     fluidRow( 
                       column(width = 2,actionButton("armazenarBD","Armazenar",class = "btn-primary")),
-                      column(width = 2,downloadButton ("downloadSerie", "Download", icon ("save")))
+                      column(width = 2,downloadButton ("downloadSerie", "Download Serie", icon ("save")))
                     )
                 )
               )
