@@ -745,6 +745,13 @@ WHERE ID_ESTACAO = IDESTACAO;")
     }
   }
   
+  deleteSerieSD =  function(idDesagregado){
+    if(!is.null(idDesagregado)){
+      query = paste("DELETE FROM DESAGREGADO WHERE idDESAGREGADO = ",idDesagregado)
+      alterDataBase(query)
+    }
+  }
+  
   deleteEstacao =  function(nome){
     if(!is.null(nome)){
       query = paste("DELETE FROM ESTACAO WHERE nome = '",nome,"'",sep="")

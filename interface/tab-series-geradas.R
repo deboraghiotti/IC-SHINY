@@ -155,7 +155,12 @@ TabSerieGeradas = tabPanel("Series Geradas",
                                    hr(),
                                    downloadButton ("downloadSerie_Gerada_SD", "Download Serie", icon ("save")),
                                    hr(),
-                                   actionButton("limpar_sd_button", "Limpar", class = "btn-primary")
+                                   fluidRow(
+                                     column(12,
+                                            actionButton("limpar_sd_button", "Limpar", class = "btn-primary"),
+                                            actionButton("delete_sd_button", "   Deletar   ", class = "btn-primary",style="background-color:#ff0000;border-color: #ff0000")
+                                     )
+                                   )
                                )
                              )
                     )

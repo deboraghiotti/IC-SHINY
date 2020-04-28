@@ -12,7 +12,7 @@ navbarPage ("PMIX (p,q,P,Q)",
             TabEstacoes,      
             TabPMIX,
             TabARMA,
-            TabSerieGeradas,
-            TabDesagregacao
+            TabDesagregacao,
+            TabSerieGeradas
                       
 )

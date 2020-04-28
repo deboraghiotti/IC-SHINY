@@ -779,30 +779,12 @@ function (input, output, session) {
     
   })
   
-  #DELETAR SERIES DO BANCO DE DADOS
-  observeEvent(input$delete_ss_button,{ 
-    SSTable <- SeriesSinteticas()
-    selectedrowindex <<- input$SeriesSinteticas_rows_selected[length(input$SeriesSinteticas_rows_selected)]
-    selectedrowindex <<- as.numeric(selectedrowindex)
-    idSerieSintetica <- (SSTable[selectedrowindex,ID])
-    deleteSerieSS(idSerieSintetica)
-    shinyalert("Deletado!","A Serie foi deletada com sucesso", type = "success")
-    output$SeriesSinteticas<- DT::renderDataTable(SeriesSinteticas(),server = TRUE, selection = 'single')
-    shinyjs::enable("selecionar_ss_button")
-    shinyjs::hide("ss_resultados")
-    shinyjs::hide("acf_mensal_ss_panel")
-    shinyjs::hide("acf_anual_ss_panel")
-    shinyjs::hide("hurst_ss_panel")
-    shinyjs::hide("avaliacao_ss_panel")
-    shinyjs::hide("volume_ss_panel")
-    shinyjs::hide("soma_ss_panel")
-    
-  })
+  
   
   observeEvent(input$selecionar_sd_button,{
     
     shinyjs::disable("selecionar_sd_button")
-    shinyjs::enable("delete_ss_button")
+    shinyjs::enable("delete_sd_button")
     selectedrowindex <<- input$SeriesDesagregadas_rows_selected[length(input$SeriesDesagregadas_rows_selected)]
     selectedrowindex <<- as.numeric(selectedrowindex)
     idSerieDesagregada <- (SDTable[selectedrowindex,ID])
@@ -900,6 +882,46 @@ function (input, output, session) {
         
   })
   
+  #DELETAR SERIES DO BANCO DE DADOS
+  observeEvent(input$delete_ss_button,{ 
+    SSTable <- SeriesSinteticas()
+    selectedrowindex <<- input$SeriesSinteticas_rows_selected[length(input$SeriesSinteticas_rows_selected)]
+    selectedrowindex <<- as.numeric(selectedrowindex)
+    idSerieSintetica <- (SSTable[selectedrowindex,ID])
+    deleteSerieSS(idSerieSintetica)
+    shinyalert("Deletado!","A Serie foi deletada com sucesso", type = "success")
+    output$SeriesSinteticas<- DT::renderDataTable(SeriesSinteticas(),server = TRUE, selection = 'single')
+    shinyjs::enable("selecionar_ss_button")
+    shinyjs::hide("ss_resultados")
+    shinyjs::hide("acf_mensal_ss_panel")
+    shinyjs::hide("acf_anual_ss_panel")
+    shinyjs::hide("hurst_ss_panel")
+    shinyjs::hide("avaliacao_ss_panel")
+    shinyjs::hide("volume_ss_panel")
+    shinyjs::hide("soma_ss_panel")
+    
+  })
+  
+  #DELETAR SERIES DO BANCO DE DADOS
+  observeEvent(input$delete_sd_button,{ 
+    SDTable <- SeriesDesagregadas()
+    selectedrowindex <<- input$SeriesDesagregadas_rows_selected[length(input$SeriesDesagregadas_rows_selected)]
+    selectedrowindex <<- as.numeric(selectedrowindex)
+    idDesagregado <- (SDTable[selectedrowindex,ID])
+    deleteSerieSD(idDesagregado)
+    shinyalert("Deletado!","A Serie foi deletada com sucesso", type = "success")
+    output$SeriesDesagregadas<- DT::renderDataTable(SeriesDesagregadas(),server = TRUE, selection = 'single')
+    shinyjs::enable("selecionar_sd_button")
+    shinyjs::hide("sd_resultados")
+    shinyjs::hide("acf_mensal_sd_panel")
+    shinyjs::hide("acf_anual_sd_panel")
+    shinyjs::hide("hurst_sd_panel")
+    shinyjs::hide("avaliacao_sd_panel")
+    shinyjs::hide("volume_sd_panel")
+    shinyjs::hide("soma_sd_panel")
+    
+  })
+  
   
   #LIMPANDO UMA CONSULTA
   observeEvent(input$limpar_ss_button,{
@@ -915,7 +937,7 @@ function (input, output, session) {
   
   observeEvent(input$limpar_sd_button,{
     shinyjs::enable("selecionar_sd_button")
-    shinyjs::disable("delete_ss_button")
+    shinyjs::disable("delete_sd_button")
     shinyjs::hide("sd_resultados")
     shinyjs::hide("acf_mensal_sd_panel")
     shinyjs::hide("acf_anual_sd_panel")
