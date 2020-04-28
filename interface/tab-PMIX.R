@@ -26,10 +26,6 @@ TabPMIX = tabPanel ("Modelo PMIX",
                                     ),
                                     hr(),
                                     sliderInput ("nsint", label = "Tamanho da serie sintetica", min = 0, max = 50000, value = 10000, width = "90%"),
-                                    fluidRow (
-                                      column(width = 6,checkboxInput ("volume", "Gerar Volume", TRUE)),
-                                      column(width = 6, checkboxInput ("hurst", "Gerar Hurst", TRUE))
-                                    ),
                                     hr(),
                                     shinyjs::hidden(
                                       div(id = "parametros_ag",
