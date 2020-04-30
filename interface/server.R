@@ -144,23 +144,11 @@ function (input, output, session) {
       }
     })
     
+    # Module avaliacaoMensal
+    serieHistorica = serieHist()
+    serieSintetica = serieEscolhida()
+    avaliacaoSint = callModule(avaliacaoMensal,"PMIX",serieHistorica,serieSintetica)
     
-    output$tabelaMedias = renderDataTable ({
-  
-      if(input$iniciar){
-        MediaHist = apply (serieHist ( ), 2, mean)
-        MediaSint = apply (serieEscolhida ( ), 2, mean)
-        DesvioHist = apply (serieHist ( ), 2, sd)
-        DesvioSint = apply (serieEscolhida ( ), 2, sd)
-        KurtSint = apply(serieEscolhida(),2,kurtosis)
-        AssimetriaSint = apply(serieEscolhida(),2,skewness)
-        CoefVarSint = DesvioSint/MediaSint
-        medidas = round(data.frame (MediaHist, MediaSint, DesvioHist, DesvioSint,KurtSint,AssimetriaSint,CoefVarSint),digits = 5)
-        rownames (medidas) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
-        colnames (medidas) = c ("Media Historica", "Media Sintetica", "Desvio-padrao Historico", "Desvio-padrao Sintetico","Indice Kurt","Assimetria","Coeficiente de Variacao")
-        datatable (medidas)
-      }
-    })
     
     
     output$tabelaAvaliacao = renderDataTable ({
@@ -229,15 +217,6 @@ function (input, output, session) {
               )) %>%
         add_markers(data = dados, x = ~MAPEfacAnual, y = ~MAPEfacMensal, z = ~MAPEdp) %>%
         add_paths(data = d, x = ~MAPEfacAnual, y = ~MAPEfacMensal, z = ~MAPEdp)
-    })
-    
-    
-    output$GraficoSerie = renderPlot ({
-      if (input$iniciar){
-        inicializaGraficoSERIE (serieHist ( ))
-        graficoSERIE (serieHist ( ), 'cornflowerblue')
-        graficoSERIE (serieEscolhida ( ), 'blue')
-      }
     })
     
     
@@ -317,27 +296,6 @@ function (input, output, session) {
                     row.names = F,
                     sep = ";",
                     dec = ",")
-      }
-    )
-    
-    output$downloadAvaliacoes = downloadHandler (
-      filename = function ( ) {
-        paste("serie_", input$nSerie, "Avaliacoes.csv",sep="")
-      },
-      content = function (file) {
-        MediaSint = apply (serieEscolhida ( ), 2, mean)
-        DesvioSint = apply (serieEscolhida ( ), 2, sd)
-        KurtSint = apply(serieEscolhida(),2,kurtosis)
-        AssimetriaSint = apply(serieEscolhida(),2,skewness)
-        CoefVarSint = DesvioSint/MediaSint
-        medidas = data.frame (MediaSint,DesvioSint,KurtSint,AssimetriaSint,CoefVarSint)
-        rownames (medidas) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
-        colnames (medidas) = c ("Media", "Desvio-padrao","Indice Kurt","Assimetria","Coeficiente de Variacao")
-        write.table(medidas, file,
-                    sep = ";",
-                    dec = ",",
-                    row.names = T,
-                    col.names = NA)
       }
     )
     
@@ -1263,9 +1221,7 @@ function (input, output, session) {
     on.exit(progress$close())
     progress$set(message = "Calculando o hurst", value = 0)
     
-    #hurstMensal = Indice_Hurst_Mensal(desagregadoNP())
     hurstMensal = Hurst (as.vector(as.matrix(desagregadoNP())))
-    #hurstAnual = Indice_Hurst(desagregadoNP_Anual())
     hurstAnual = Hurst (as.vector(as.matrix(desagregadoNP_Anual())))
     hurst = list(hurstAnual = hurstAnual,hurstMensal = hurstMensal)
     
@@ -1284,17 +1240,14 @@ function (input, output, session) {
     
     shinyjs::show("resultados_DNP")
     
-    output$tabelaAvaliacao_DNP = renderDataTable(relatorioSint)
+    # Module avaliacaoMensal 
+    serieHistorica = dadosDNP()$serieHist
+    avaliacaoSint = callModule(avaliacaoMensal,"DNP",serieHistorica,desagregadoNP)
+    
+    
     output$hurst_DNP = renderPrint({
       print(paste("Hurst Mensal: ",hurstMensal))
       print(paste("Hurst Anual: ",hurstAnual))
-    })
-    
-    output$GraficoSerie_DNP = renderPlot ({
-        inicializaGraficoSERIE (dadosDNP()$serieHist)
-        graficoSERIE (dadosDNP()$serieHist, 'cornflowerblue')
-        graficoSERIE (desagregadoNP, 'blue')
-
     })
     
     output$FACAnuais_DNP = renderPlot ({
@@ -1347,26 +1300,6 @@ function (input, output, session) {
       }
     )
     
-    output$downloadAvaliacoes_DNP = downloadHandler (
-      filename = function ( ) {
-        paste("serieDNP_Avaliacoes.csv",sep="")
-      },
-      content = function (file) {
-        MediaSint = apply (desagregadoNP, 2, mean)
-        DesvioSint = apply (desagregadoNP, 2, sd)
-        KurtSint = apply(desagregadoNP,2,kurtosis)
-        AssimetriaSint = apply(desagregadoNP,2,skewness)
-        CoefVarSint = DesvioSint/MediaSint
-        medidas = data.frame (MediaSint,DesvioSint,KurtSint,AssimetriaSint,CoefVarSint)
-        rownames (medidas) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
-        colnames (medidas) = c ("Media", "Desvio-padrao","Indice Kurt","Assimetria","Coeficiente de Variacao")
-        write.table(medidas, file,
-                    sep = ";",
-                    dec = ",",
-                    row.names = T,
-                    col.names = NA)
-      }
-    )
     
     output$downloadTabelaAnual_DNP = downloadHandler (
       filename = function ( ) {

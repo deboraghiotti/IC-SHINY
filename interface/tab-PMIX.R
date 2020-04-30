@@ -79,9 +79,8 @@ TabPMIX = tabPanel ("Modelo PMIX",
                       ),
                       tabPanel("Graficos series",
                                br ( ),
-                               plotOutput("GraficoSerie"),
-                               dataTableOutput("tabelaMedias"),
-                               downloadButton ("downloadAvaliacoes", "Download Avaliacoes", icon ("save"))
+                               # Module avaliacaoMensal
+                               avaliacaoMensalOutput("PMIX")
                       ),
                       tabPanel("Graficos FAC anuais",
                                br ( ),
