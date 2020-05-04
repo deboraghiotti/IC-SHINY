@@ -981,17 +981,9 @@ function (input, output, session) {
     
     ######### Resultados
     ######### TabPanel: Avaliacoes
-    output$tabelaAvaliacao_ARMA = renderDataTable({
-      medidas = data.frame (Media_ARMA, Desvio_ARMA, Kurt_ARMA,Assimetria_ARMA,CoefVar_ARMA)
-      colnames (medidas) = c ("Media", "Desvio-padrao", "Indice Kurt","Assimetria","Coeficiente de Variacao")
-      datatable (medidas)
-    })
     
-    output$tabelaAvaliacaoHist_ARMA = renderDataTable({
-      medidas = data.frame (MediaHist_ARMA, DesvioHist_ARMA, KurtHist_ARMA,AssimetriaHist_ARMA,CoefVarHist_ARMA)
-      colnames (medidas) = c ("Media", "Desvio-padrao", "Indice Kurt","Assimetria","Coeficiente de Variacao")
-      datatable (medidas)
-    })
+    serieSinteticaAnual = serieSint_ARMA()
+    avaliacaoSintAnual = callModule(avaliacaoAnual,"ARMA",serieAnualHist_ARMA,serieSinteticaAnual)
     
     output$GraficoSerie_ARMA = renderPlot({
       inicializaGraficoFACANUAL (serieAnualHist_ARMA , 12)
@@ -1050,26 +1042,6 @@ function (input, output, session) {
       }
     )
     
-    output$downloadAvaliacoes_ARMA = downloadHandler (
-      filename = function ( ) {
-        paste("serieARMA_Avaliacoes.csv",sep="")
-      },
-      content = function (file) {
-        
-        Media_ARMA = avaliacoes_ARMA()$Media
-        Desvio_ARMA = avaliacoes_ARMA()$Dp
-        Kurt_ARMA = avaliacoes_ARMA()$Kurt
-        Assimetria_ARMA = avaliacoes_ARMA()$Assimetria
-        CoefVar_ARMA = avaliacoes_ARMA()$Coef_Var
-        medidas = data.frame (Media_ARMA,Desvio_ARMA,Kurt_ARMA,Assimetria_ARMA,CoefVar_ARMA)
-        colnames (medidas) = c ("Media", "Desvio-padrao","Indice Kurt","Assimetria","Coeficiente de Variacao")
-        write.table(medidas, file,
-                    sep = ";",
-                    dec = ",",
-                    row.names = T,
-                    col.names = NA)
-      }
-    )
     
   })
   
@@ -1351,11 +1323,6 @@ function (input, output, session) {
       acfMensal = data.frame (autocorrelacaoMensal (desagregadoNP(), 12)[-1, ])
       acfAnual = data.frame (as.vector (autocorrelacaoAnual (desagregadoNP_Anual(), 12)[-1]))
       volume = volumeUtil (as.matrix(desagregadoNP()), (input$Pregularizacao_DNP/100), TRUE)
-      # print(MediaArmazenar)
-      # print(DesvioArmazenar)
-      # print(KurtArmazenar)
-      # print(AssimetriaArmazenar)
-      # print(CoefVarArmazenar)
     
       idDesagregado = registrarSSDESAGREGACAO(dadosDNP()$idSerie_Sintetica,"N")
       inserirSS_Desagregado(idDesagregado,desagregadoNP())

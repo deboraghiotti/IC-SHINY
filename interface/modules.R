@@ -1,3 +1,6 @@
+# Modularizacao
+# Fonte: https://shiny.rstudio.com/articles/modules.html
+
 # Module avaliacaoMensal: Esse "module" realiza a avaliacao da serie sintetica mensal.
 
 # UI: Gráfico que compara a media e o desvio padrao da serie historica com a serie sintetica, Tabela com a media, desvio
@@ -5,9 +8,6 @@
 
 # Server: retorna um data.frame com a avaliacao da serie sintetica (media, desvio padrao,kurt, assimetria e 
 # coeficiente de variacao).
-
-# Fonte: https://shiny.rstudio.com/articles/modules.html
-
 
 avaliacaoMensalOutput <- function(id){
   
@@ -69,4 +69,75 @@ avaliacaoMensal <- function(input,output,session,serieHist,serieSint){
   
   return(avaliacaoSint)
     
+}
+
+# Module avaliacaoAnual: Esse "module" realiza a avaliacao da serie sintetica anual.
+
+# UI: Gráfico que compara a media e o desvio padrao da serie historica com a serie sintetica, Tabela com a media, desvio
+# padrao, kurt, assimetria e coeficiente de variadrao, e um botao para baixar a avaliacao da serie sintetica.
+
+# Server: retorna um data.frame com a avaliacao da serie sintetica (media, desvio padrao,kurt, assimetria e 
+# coeficiente de variacao).
+
+avaliacaoAnualOutput <- function(id){
+  
+  # Criando o namespace
+  ns <- NS(id)
+  
+  tagList( 
+    dataTableOutput(ns("tabelaAvaliacaoAnual")),
+    downloadButton (ns("downloadAvaliacaoAnual"), "Download Avaliacoes", icon ("save"))
+  )
+  
+  
+}
+
+avaliacaoAnual <- function(input,output,session,serieHistAnual,serieSintAnual){
+  
+  mediaSint = mean(serieSintAnual)
+  desvioSint = sd(serieSintAnual)
+  kurtSint = kurtosis(serieSintAnual)
+  assimetriaSint = skewness(serieSintAnual)
+  coefVarSint = desvioSint/mediaSint
+  
+  
+  mediaHist = mean (serieHistAnual)
+  desvioHist = sd (serieHistAnual)
+  kurtHist = kurtosis(serieHistAnual)
+  assimetriaHist = skewness(serieHistAnual)
+  coefVarHist = desvioHist/mediaHist
+  
+  media = c(mediaSint,mediaHist)
+  desvio = c(desvioSint,desvioHist)
+  kurt = c(kurtSint,kurtHist)
+  assimetria = c(assimetriaSint,assimetriaHist)
+  coefVar = c(coefVarSint,coefVarHist)
+  
+  avaliacaoSintAnual = data.frame(mediaSint,desvioSint,kurtSint,assimetriaSint,coefVarSint)
+  colnames(avaliacaoSintAnual) = c("mediaSint","desvioSint","kurtSint","assimetriaSint","coefVarSint")
+  
+  output$tabelaAvaliacaoAnual = renderDataTable({
+    medidas = data.frame (media,desvio,kurt,assimetria,coefVar)
+    colnames (medidas) = c ("Media", "Desvio-padrao", "Indice Kurt","Assimetria","Coeficiente de Variacao")
+    rownames(medidas) = c("Sintetico","Historico")
+    datatable (medidas)
+  })
+  
+  output$downloadAvaliacaoAnual = downloadHandler (
+    filename = function ( ) {
+      paste("serieAvaliacaoAnual.csv",sep="")
+    },
+    content = function (file) {
+      
+      medidas = avaliacaoSintAnual
+      colnames (medidas) = c ("Media", "Desvio-padrao","Indice Kurt","Assimetria","Coeficiente de Variacao")
+      write.table(medidas, file,
+                  sep = ";",
+                  dec = ",",
+                  row.names = T,
+                  col.names = NA)
+    })
+  
+  return(avaliacaoSintAnual)
+  
 }

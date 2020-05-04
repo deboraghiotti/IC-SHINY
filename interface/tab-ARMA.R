@@ -41,13 +41,7 @@ TabARMA = tabPanel("Modelo ARMA",
                      
                      tabPanel("Avaliacao",
                               br ( ),
-                              h4 (strong ("Tabela de Avaliacoes Historica")),
-                              dataTableOutput("tabelaAvaliacaoHist_ARMA"),
-                              hr(),
-                              h4 (strong ("Tabela de Avaliacoes Sintetica")),
-                              dataTableOutput("tabelaAvaliacao_ARMA"),
-                              downloadButton ("downloadAvaliacoes_ARMA", "Download Avaliacoes", icon ("save"))
-                              
+                              avaliacaoAnualOutput("ARMA")
                      ),
                      tabPanel("Medidas",
                               br ( ),
