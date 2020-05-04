@@ -141,3 +141,55 @@ avaliacaoAnual <- function(input,output,session,serieHistAnual,serieSintAnual){
   return(avaliacaoSintAnual)
   
 }
+
+# Module facAnual: Esse "module" calcula a FAC ANUAL da serie sintetica (anual).
+
+# UI: Gráfico da FAC ANUAL (historico vs sintetico), a autocorrelacao anual e um botao para download da autocorrelacao 
+# sintetica anual
+
+# Server:
+
+facAnualOutput <- function(id){
+  
+  # Criando o namespace
+  ns <- NS(id)
+  
+  tagList(
+    
+    plotOutput(ns("graficoFacAnual")),
+    dataTableOutput(ns("tabelaFacAnual")),
+    downloadButton (ns("downloadFacAnual"), "Download FAC Anual", icon ("save"))
+    
+  )
+  
+}
+
+facAnual <- function(input,output,session,serieHistAnual,serieSintAnual){
+  
+  acfAnual = data.frame (as.vector (autocorrelacaoAnual (serieSintAnual, 12)[-1]))
+  rownames (acfAnual) = paste ("lag", 1:12)
+  colnames (acfAnual) = c (("FAC"))
+  
+  output$graficoFacAnual = renderPlot ({
+      inicializaGraficoFACANUAL (serieHistAnual, 12)
+      graficoFACANUAL (serieHistAnual, 12, 'cornflowerblue')
+      graficoFACANUAL (serieSintAnual, 12, 'blue')
+  })
+  
+  output$tabelaFacAnual = renderDataTable ({
+      datatable (acfAnual)
+  })
+  
+  output$downloadFacAnual = downloadHandler (
+    filename = function ( ) {
+      paste0 ("serieFACAnual", ".csv")
+    },
+    content = function (file) {
+      write.table (acfAnual, file, col.names = NA, row.names = T,
+                   sep = ";",
+                   dec = ",")
+    }
+  )
+  
+}
+

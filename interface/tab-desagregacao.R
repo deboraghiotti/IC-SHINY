@@ -46,9 +46,8 @@ TabDesagregacao = tabPanel("Desagregacao",
                                              ),
                                     tabPanel("Grafico FAC Anuais",
                                              br ( ),
-                                             plotOutput("FACAnuais_DNP"),
-                                             dataTableOutput("tabelaAnual_DNP"),
-                                             downloadButton ("downloadTabelaAnual_DNP", "Download Tabela Anual", icon ("save"))
+                                             # Module facAnual
+                                             facAnualOutput("DNP")
                                              
                                     ),
                                     tabPanel("Graficos FAC mensais",

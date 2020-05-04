@@ -219,24 +219,10 @@ function (input, output, session) {
         add_paths(data = d, x = ~MAPEfacAnual, y = ~MAPEfacMensal, z = ~MAPEdp)
     })
     
-    
-    output$FACAnuais = renderPlot ({
-      if (input$iniciar){
-        inicializaGraficoFACANUAL (serieHistAnual ( ), 12)
-        graficoFACANUAL (serieHistAnual ( ), 12, 'cornflowerblue')
-        graficoFACANUAL (serieEscolhidaAnual ( ), 12, 'blue')
-      }
-    })
-    
-    
-    output$tabelaAnual = renderDataTable ({
-      if (input$iniciar){
-        facAnual = data.frame (as.vector (autocorrelacaoAnual (serieEscolhidaAnual ( ), 12)[-1]))
-        rownames (facAnual) = paste ("lag", 1:12)
-        datatable (facAnual, colnames = NULL)
-      }
-    })
-    
+    # Module facAnual
+    serieHistoricaAnual = serieHistAnual()
+    serieSinteticaAnual = serieEscolhidaAnual()
+    callModule(facAnual,"PMIX",serieHistoricaAnual,serieSinteticaAnual)
     
     output$FACMensais = renderPlot ({
       if (input$iniciar){
@@ -296,21 +282,6 @@ function (input, output, session) {
                     row.names = F,
                     sep = ";",
                     dec = ",")
-      }
-    )
-    
-    
-    output$downloadTabelaAnual = downloadHandler (
-      filename = function ( ) {
-        paste0 ("serie_", input$nSerie, "FACAnual", ".csv")
-      },
-      content = function (file) {
-        tabela = data.frame (autocorrelacaoAnual (apply (serieEscolhida ( ), 1, sum), 12))
-        colnames (tabela) = c (("FAC"))
-        rownames (tabela) = c (paste ("lag", 0:12))
-        write.table (tabela, file, col.names = NA, row.names = T,
-                     sep = ";",
-                     dec = ",")
       }
     )
     
@@ -985,17 +956,7 @@ function (input, output, session) {
     serieSinteticaAnual = serieSint_ARMA()
     avaliacaoSintAnual = callModule(avaliacaoAnual,"ARMA",serieAnualHist_ARMA,serieSinteticaAnual)
     
-    output$GraficoSerie_ARMA = renderPlot({
-      inicializaGraficoFACANUAL (serieAnualHist_ARMA , 12)
-      graficoFACANUAL (serieAnualHist_ARMA, 12, 'cornflowerblue')
-      graficoFACANUAL (serieSint_ARMA() , 12, 'blue')
-    })
-    
-    output$tabelaAnual_ARMA = renderDataTable ({
-        facAnual = acfAnual_ARMA()
-        rownames (facAnual) = paste ("lag", 1:12)
-        datatable (facAnual, colnames = NULL)
-    })
+    callModule(facAnual,"ARMA",serieAnualHist_ARMA,serieSinteticaAnual)
     
     output$hurst_ARMA = renderPrint ({
         print ("Serie historica")
@@ -1028,19 +989,7 @@ function (input, output, session) {
       }
     )
     
-    output$downloadTabelaAnual_ARMA = downloadHandler (
-      filename = function ( ) {
-        paste0 ("serieARMA_FACAnual", ".csv")
-      },
-      content = function (file) {
-        tabela = data.frame (acfAnual_ARMA())
-        colnames (tabela) = c (("FAC"))
-        rownames (tabela) = c (paste ("lag", 1:12))
-        write.table (tabela, file, col.names = NA, row.names = T,
-                     sep = ";",
-                     dec = ",")
-      }
-    )
+   
     
     
   })
@@ -1222,18 +1171,9 @@ function (input, output, session) {
       print(paste("Hurst Anual: ",hurstAnual))
     })
     
-    output$FACAnuais_DNP = renderPlot ({
-        inicializaGraficoFACANUAL (dadosDNP()$serieHist_Anual, 12)
-        graficoFACANUAL (dadosDNP()$serieHist_Anual, 12, 'cornflowerblue')
-        graficoFACANUAL (desagregadoNP_Anual, 12, 'blue')
-    })
-    
-    
-    output$tabelaAnual_DNP = renderDataTable ({
-        facAnual = data.frame (as.vector (autocorrelacaoAnual (desagregadoNP_Anual, 12)[-1]))
-        rownames (facAnual) = paste ("lag", 1:12)
-        datatable (facAnual, colnames = NULL)
-    })
+    # Module facAnual
+    serieHistoricaAnual = dadosDNP()$serieHist_Anual
+    callModule(facAnual,"DNP",serieHistoricaAnual,desagregadoNP_Anual)
     
     output$FACMensais_DNP = renderPlot ({
         inicializaGraficoMENSAL (dadosDNP()$serieHist, as.numeric (input$lagMensalMAX_DNP))
@@ -1269,21 +1209,6 @@ function (input, output, session) {
                     row.names = F,
                     sep = ";",
                     dec = ",")
-      }
-    )
-    
-    
-    output$downloadTabelaAnual_DNP = downloadHandler (
-      filename = function ( ) {
-        paste0 ("serieDNP_FACAnual", ".csv")
-      },
-      content = function (file) {
-        tabela = data.frame (autocorrelacaoAnual (apply (desagregadoNP, 1, sum), 12))
-        colnames (tabela) = c (("FAC"))
-        rownames (tabela) = c (paste ("lag", 0:12))
-        write.table (tabela, file, col.names = NA, row.names = T,
-                     sep = ";",
-                     dec = ",")
       }
     )
     

@@ -34,13 +34,13 @@ TabARMA = tabPanel("Modelo ARMA",
                    tabsetPanel (
                      tabPanel("Graficos FAC anuais",
                               br(),
-                              plotOutput ("GraficoSerie_ARMA"),
-                              dataTableOutput("tabelaAnual_ARMA"),
-                              downloadButton ("downloadTabelaAnual_ARMA", "Download Tabela Anual", icon ("save"))
+                              # Module facAnual
+                              facAnualOutput("ARMA")
                      ),
                      
                      tabPanel("Avaliacao",
                               br ( ),
+                              # Module avaliacaoAnual
                               avaliacaoAnualOutput("ARMA")
                      ),
                      tabPanel("Medidas",

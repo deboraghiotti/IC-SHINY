@@ -84,9 +84,8 @@ TabPMIX = tabPanel ("Modelo PMIX",
                       ),
                       tabPanel("Graficos FAC anuais",
                                br ( ),
-                               plotOutput("FACAnuais"),
-                               dataTableOutput("tabelaAnual"),
-                               downloadButton ("downloadTabelaAnual", "Download FAC Anual", icon ("save"))
+                               # Module facAnual
+                               facAnualOutput("PMIX")
                       ),
                       tabPanel("Graficos FAC mensais",
                                br ( ),
