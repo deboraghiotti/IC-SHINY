@@ -89,10 +89,11 @@ TabPMIX = tabPanel ("Modelo PMIX",
                       ),
                       tabPanel("Graficos FAC mensais",
                                br ( ),
-                               selectInput ("lagMensalMAX", "lag mensal analisado:", choices = 1:12, selected = 1),
-                               plotOutput ("FACMensais"),
-                               dataTableOutput ("tabelaMensal"),
-                               downloadButton ("downloadTabelaMensal", "Download FAC Mensal", icon ("save"))
+                               facMensalOutput("PMIX")
+                               # selectInput ("lagMensalMAX", "lag mensal analisado:", choices = 1:12, selected = 1),
+                               # plotOutput ("FACMensais"),
+                               # dataTableOutput ("tabelaMensal"),
+                               # downloadButton ("downloadTabelaMensal", "Download FAC Mensal", icon ("save"))
                       ),
                       tabPanel("Medidas",
                                br ( ),

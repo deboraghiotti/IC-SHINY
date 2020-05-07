@@ -26,27 +26,29 @@ avaliacaoMensalOutput <- function(id){
 
 avaliacaoMensal <- function(input,output,session,serieHist,serieSint){
   
-  mediaSint = apply (serieSint, 2, mean)
-  desvioSint = apply (serieSint, 2, sd)
-  kurtSint = apply(serieSint,2,kurtosis)
-  assimetriaSint = apply(serieSint,2,skewness)
-  coefVarSint = desvioSint/mediaSint
+  mediaSint = reactive(apply (serieSint(), 2, mean))
+  desvioSint = reactive(apply (serieSint(), 2, sd))
+  kurtSint = reactive(apply(serieSint(),2,kurtosis))
+  assimetriaSint = reactive(apply(serieSint(),2,skewness))
+  coefVarSint = reactive(desvioSint()/mediaSint())
   
-  avaliacaoSint = data.frame (mediaSint,desvioSint,kurtSint,assimetriaSint,coefVarSint)
-  colnames(avaliacaoSint) = c("mediaSint","desvioSint","kurtSint","assimetriaSint","coefVarSint")
-  rownames (avaliacaoSint) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
-  
+  avaliacaoSint = reactive({
+    avaliacao = data.frame (mediaSint(),desvioSint(),kurtSint(),assimetriaSint(),coefVarSint())
+    colnames(avaliacao) = c("mediaSint","desvioSint","kurtSint","assimetriaSint","coefVarSint")
+    rownames (avaliacao) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
+  })
+
   output$graficoSerie = renderPlot ({
       inicializaGraficoSERIE(serieHist)
       graficoSERIE (serieHist, 'cornflowerblue')
-      graficoSERIE (serieSint, 'blue')
+      graficoSERIE (serieSint(), 'blue')
   })
   
   output$tabelaAvaliacao = renderDataTable ({
       mediaHist = apply (serieHist, 2, mean)
       desvioHist = apply (serieHist, 2, sd)
       
-      medidas = round(data.frame (mediaHist, mediaSint, desvioHist, desvioSint,kurtSint,assimetriaSint,coefVarSint),digits = 5)
+      medidas = round(data.frame (mediaHist, mediaSint(), desvioHist, desvioSint(),kurtSint(),assimetriaSint(),coefVarSint()),digits = 5)
       rownames (medidas) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
       colnames (medidas) = c ("Media Historica", "Media Sintetica", "Desvio-padrao Historico", "Desvio-padrao Sintetico","Indice Kurt","Assimetria","Coeficiente de Variacao")
       datatable (medidas)
@@ -57,7 +59,7 @@ avaliacaoMensal <- function(input,output,session,serieHist,serieSint){
       paste("serieAvaliacao.csv",sep="")
     },
     content = function (file) {
-      medidas = avaliacaoSint
+      medidas = data.frame (mediaSint(),desvioSint(),kurtSint(),assimetriaSint(),coefVarSint())
       rownames (medidas) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
       colnames (medidas) = c ("Media", "Desvio-padrao","Indice Kurt","Assimetria","Coeficiente de Variacao")
       write.table(medidas, file,
@@ -94,11 +96,11 @@ avaliacaoAnualOutput <- function(id){
 
 avaliacaoAnual <- function(input,output,session,serieHistAnual,serieSintAnual){
   
-  mediaSint = mean(serieSintAnual)
-  desvioSint = sd(serieSintAnual)
-  kurtSint = kurtosis(serieSintAnual)
-  assimetriaSint = skewness(serieSintAnual)
-  coefVarSint = desvioSint/mediaSint
+  mediaSint = reactive(mean(serieSintAnual()))
+  desvioSint = reactive(sd(serieSintAnual()))
+  kurtSint = reactive(kurtosis(serieSintAnual()))
+  assimetriaSint = reactive(skewness(serieSintAnual()))
+  coefVarSint = reactive(desvioSint()/mediaSint())
   
   
   mediaHist = mean (serieHistAnual)
@@ -107,15 +109,16 @@ avaliacaoAnual <- function(input,output,session,serieHistAnual,serieSintAnual){
   assimetriaHist = skewness(serieHistAnual)
   coefVarHist = desvioHist/mediaHist
   
-  media = c(mediaSint,mediaHist)
-  desvio = c(desvioSint,desvioHist)
-  kurt = c(kurtSint,kurtHist)
-  assimetria = c(assimetriaSint,assimetriaHist)
-  coefVar = c(coefVarSint,coefVarHist)
+  media = c(mediaSint(),mediaHist)
+  desvio = c(desvioSint(),desvioHist)
+  kurt = c(kurtSint(),kurtHist)
+  assimetria = c(assimetriaSint(),assimetriaHist)
+  coefVar = c(coefVarSint(),coefVarHist)
   
-  avaliacaoSintAnual = data.frame(mediaSint,desvioSint,kurtSint,assimetriaSint,coefVarSint)
-  colnames(avaliacaoSintAnual) = c("mediaSint","desvioSint","kurtSint","assimetriaSint","coefVarSint")
-  
+  avaliacaoSintAnual = reactive({
+    avaliacao = data.frame(mediaSint(),desvioSint(),kurtSint(),assimetriaSint(),coefVarSint())
+    colnames(avaliacao) = c("mediaSint","desvioSint","kurtSint","assimetriaSint","coefVarSint")
+  })
   output$tabelaAvaliacaoAnual = renderDataTable({
     medidas = data.frame (media,desvio,kurt,assimetria,coefVar)
     colnames (medidas) = c ("Media", "Desvio-padrao", "Indice Kurt","Assimetria","Coeficiente de Variacao")
@@ -129,7 +132,7 @@ avaliacaoAnual <- function(input,output,session,serieHistAnual,serieSintAnual){
     },
     content = function (file) {
       
-      medidas = avaliacaoSintAnual
+      medidas = data.frame(mediaSint(),desvioSint(),kurtSint(),assimetriaSint(),coefVarSint())
       colnames (medidas) = c ("Media", "Desvio-padrao","Indice Kurt","Assimetria","Coeficiente de Variacao")
       write.table(medidas, file,
                   sep = ";",
@@ -138,7 +141,7 @@ avaliacaoAnual <- function(input,output,session,serieHistAnual,serieSintAnual){
                   col.names = NA)
     })
   
-  return(avaliacaoSintAnual)
+  return(avaliacaoSintAnual())
   
 }
 
@@ -146,8 +149,6 @@ avaliacaoAnual <- function(input,output,session,serieHistAnual,serieSintAnual){
 
 # UI: Gráfico da FAC ANUAL (historico vs sintetico), a autocorrelacao anual e um botao para download da autocorrelacao 
 # sintetica anual
-
-# Server:
 
 facAnualOutput <- function(id){
   
@@ -166,18 +167,23 @@ facAnualOutput <- function(id){
 
 facAnual <- function(input,output,session,serieHistAnual,serieSintAnual){
   
-  acfAnual = data.frame (as.vector (autocorrelacaoAnual (serieSintAnual, 12)[-1]))
-  rownames (acfAnual) = paste ("lag", 1:12)
-  colnames (acfAnual) = c (("FAC"))
+  acfAnual = reactive({
+    autocorrelacaoAnual (serieSintAnual(), 12)
+  })
+  
+  
   
   output$graficoFacAnual = renderPlot ({
       inicializaGraficoFACANUAL (serieHistAnual, 12)
       graficoFACANUAL (serieHistAnual, 12, 'cornflowerblue')
-      graficoFACANUAL (serieSintAnual, 12, 'blue')
+      graficoFACANUAL (serieSintAnual(), 12, 'blue')
   })
   
   output$tabelaFacAnual = renderDataTable ({
-      datatable (acfAnual)
+      acf = data.frame (as.vector (acfAnual()[-1]))
+      rownames (acf) = paste ("lag", 1:12)
+      colnames (acf) = c (("FAC"))
+      datatable (acf)
   })
   
   output$downloadFacAnual = downloadHandler (
@@ -185,11 +191,69 @@ facAnual <- function(input,output,session,serieHistAnual,serieSintAnual){
       paste0 ("serieFACAnual", ".csv")
     },
     content = function (file) {
-      write.table (acfAnual, file, col.names = NA, row.names = T,
+      acf = data.frame (as.vector (acfAnual()[-1]))
+      rownames (acf) = paste ("lag", 1:12)
+      colnames (acf) = c (("FAC"))
+      write.table (acf, file, col.names = NA, row.names = T,
                    sep = ";",
                    dec = ",")
-    }
+    })
+  
+}
+
+
+# Module facMensal: Esse "module" calcula a FAC Mensal da serie sintetica (mensal).
+
+# UI: Gráfico da FAC Mensal (historico vs sintetico) para cada lag, select input para escolher o lag do grafico,
+# a autocorrelacao mensal e um botao para download da autocorrelacao sintetica mensal
+
+facMensalOutput <- function(id){
+  
+  # Criando o namespace
+  
+  ns <- NS(id)
+  
+  tagList( 
+    selectInput (ns("lagFacMensal"), "lag mensal analisado:", choices = 1:12, selected = 1),
+    plotOutput (ns("graficoFacMensal")),
+    dataTableOutput (ns("tabelaFacMensal")),
+    downloadButton (ns("downloadFacMensal"), "Download FAC Mensal", icon ("save"))
   )
+  
+}
+
+facMensal <- function(input,output,session,serieHist,serieSint){
+  
+  acfMensal = reactive({
+    
+    autocorrelacaoMensal (serieSint(), 12)
+  })
+  
+  output$graficoFacMensal = renderPlot ({
+      inicializaGraficoMENSAL (serieHist, as.numeric (input$lagFacMensal))
+      graficoFACMENSAL (serieHist, as.numeric (input$lagFacMensal), 'cornflowerblue')
+      graficoFACMENSAL (serieSint(), as.numeric (input$lagFacMensal), 'blue')
+  })
+  
+  output$tabelaFacMensal = renderDataTable ({
+      acf = data.frame (acfMensal()[-1, ])
+      colnames (acf) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
+      rownames (acf) = paste ("lag", 1:12)
+      datatable (round(acf,digits = 5))
+  })
+  
+  output$downloadFacMensal = downloadHandler (
+    filename = function ( ) {
+      paste0 ("serieFACMensal", ".csv")
+    },
+    content = function (file) {
+      acf = data.frame (acfMensal()[-1, ])
+      colnames (acf) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
+      rownames (acf) = paste ("lag", 1:12)
+      write.table (acf, file, col.names = NA, row.names = T,
+                   sep = ";",
+                   dec = ",")
+    })
   
 }
 

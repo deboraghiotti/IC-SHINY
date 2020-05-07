@@ -52,10 +52,8 @@ TabDesagregacao = tabPanel("Desagregacao",
                                     ),
                                     tabPanel("Graficos FAC mensais",
                                              br ( ),
-                                             selectInput ("lagMensalMAX_DNP", "lag mensal analisado:", choices = 1:12, selected = 1),
-                                             plotOutput ("FACMensais_DNP"),
-                                             dataTableOutput ("tabelaMensal_DNP"),
-                                             downloadButton ("downloadTabelaMensal_DNP", "Download Tabela Mensal", icon ("save"))
+                                             #  Module facMensal
+                                             facMensalOutput("DNP")
                                     ),
                                     tabPanel("Medidas",
                                              br(),

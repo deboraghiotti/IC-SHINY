@@ -147,7 +147,7 @@ function (input, output, session) {
     # Module avaliacaoMensal
     serieHistorica = serieHist()
     serieSintetica = serieEscolhida()
-    avaliacaoSint = callModule(avaliacaoMensal,"PMIX",serieHistorica,serieSintetica)
+    avaliacaoSint = callModule(avaliacaoMensal,"PMIX",serieHistorica,serieEscolhida)
     
     
     
@@ -222,25 +222,28 @@ function (input, output, session) {
     # Module facAnual
     serieHistoricaAnual = serieHistAnual()
     serieSinteticaAnual = serieEscolhidaAnual()
-    callModule(facAnual,"PMIX",serieHistoricaAnual,serieSinteticaAnual)
+    callModule(facAnual,"PMIX",serieHistoricaAnual,serieEscolhidaAnual)
     
-    output$FACMensais = renderPlot ({
-      if (input$iniciar){
-        inicializaGraficoMENSAL (serieHist ( ), as.numeric (input$lagMensalMAX))
-        graficoFACMENSAL (serieHist ( ), as.numeric (input$lagMensalMAX), 'cornflowerblue')
-        graficoFACMENSAL (serieEscolhida ( ), as.numeric (input$lagMensalMAX), 'blue')
-      }
-    })
+    # Module facMensal
+    callModule(facMensal,"PMIX",serieHistorica,serieEscolhida)
     
-    
-    output$tabelaMensal = renderDataTable ({
-      if (input$iniciar){
-        facMensal = round(data.frame (autocorrelacaoMensal (serieEscolhida ( ), 12)[-1, ]),digits = 4)
-        colnames (facMensal) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
-        rownames (facMensal) = paste ("lag", 1:12)
-        datatable (facMensal)
-      }
-    })
+    # output$FACMensais = renderPlot ({
+    #   if (input$iniciar){
+    #     inicializaGraficoMENSAL (serieHist ( ), as.numeric (input$lagMensalMAX))
+    #     graficoFACMENSAL (serieHist ( ), as.numeric (input$lagMensalMAX), 'cornflowerblue')
+    #     graficoFACMENSAL (serieEscolhida ( ), as.numeric (input$lagMensalMAX), 'blue')
+    #   }
+    # })
+    # 
+    # 
+    # output$tabelaMensal = renderDataTable ({
+    #   if (input$iniciar){
+    #     facMensal = round(data.frame (autocorrelacaoMensal (serieEscolhida ( ), 12)[-1, ]),digits = 4)
+    #     colnames (facMensal) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
+    #     rownames (facMensal) = paste ("lag", 1:12)
+    #     datatable (facMensal)
+    #   }
+    # })
     
     
     output$volumeUtil = renderPrint ({
@@ -286,19 +289,19 @@ function (input, output, session) {
     )
     
     
-    output$downloadTabelaMensal = downloadHandler (
-      filename = function ( ) {
-        paste0 ("serie_", input$nSerie, "FACMensal", ".csv")
-      },
-      content = function (file) {
-        tabela = data.frame (autocorrelacaoMensal (serieEscolhida ( ), 12))
-        colnames (tabela) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
-        rownames (tabela) = c (paste ("lag", 0:12))
-        write.table (tabela, file, col.names = NA, row.names = T,
-                     sep = ";",
-                     dec = ",")
-      }
-    )
+    # output$downloadTabelaMensal = downloadHandler (
+    #   filename = function ( ) {
+    #     paste0 ("serie_", input$nSerie, "FACMensal", ".csv")
+    #   },
+    #   content = function (file) {
+    #     tabela = data.frame (autocorrelacaoMensal (serieEscolhida ( ), 12))
+    #     colnames (tabela) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
+    #     rownames (tabela) = c (paste ("lag", 0:12))
+    #     write.table (tabela, file, col.names = NA, row.names = T,
+    #                  sep = ";",
+    #                  dec = ",")
+    #   }
+    # )
     
   })
   
@@ -953,10 +956,10 @@ function (input, output, session) {
     ######### Resultados
     ######### TabPanel: Avaliacoes
     
-    serieSinteticaAnual = serieSint_ARMA()
-    avaliacaoSintAnual = callModule(avaliacaoAnual,"ARMA",serieAnualHist_ARMA,serieSinteticaAnual)
+    #serieSinteticaAnual = serieSint_ARMA()
+    avaliacaoSintAnual = callModule(avaliacaoAnual,"ARMA",serieAnualHist_ARMA,serieSint_ARMA)
     
-    callModule(facAnual,"ARMA",serieAnualHist_ARMA,serieSinteticaAnual)
+    callModule(facAnual,"ARMA",serieAnualHist_ARMA,serieSint_ARMA)
     
     output$hurst_ARMA = renderPrint ({
         print ("Serie historica")
@@ -1153,11 +1156,10 @@ function (input, output, session) {
     shinyjs::disable("SeriesDesagregacao_button")
     shinyjs::enable("limparButton_DNP")
     
-    desagregadoNP = desagregadoNP()
+    desagregadoNaoP = desagregadoNP()
     relatorioSint = relatorioSint()
     hurstAnual = hurstDNP()$hurstAnual
     hurstMensal = hurstDNP()$hurstMensal
-    desagregadoNP_Anual = desagregadoNP_Anual()
     
     shinyjs::show("resultados_DNP")
     
@@ -1175,26 +1177,15 @@ function (input, output, session) {
     serieHistoricaAnual = dadosDNP()$serieHist_Anual
     callModule(facAnual,"DNP",serieHistoricaAnual,desagregadoNP_Anual)
     
-    output$FACMensais_DNP = renderPlot ({
-        inicializaGraficoMENSAL (dadosDNP()$serieHist, as.numeric (input$lagMensalMAX_DNP))
-        graficoFACMENSAL (dadosDNP()$serieHist, as.numeric (input$lagMensalMAX_DNP), 'cornflowerblue')
-        graficoFACMENSAL (desagregadoNP, as.numeric (input$lagMensalMAX_DNP), 'blue')
-    })
-    
-    
-    output$tabelaMensal_DNP = renderDataTable ({
-        facMensal = round(data.frame (autocorrelacaoMensal (desagregadoNP, 12)[-1, ]),digits = 5)
-        colnames (facMensal) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
-        rownames (facMensal) = paste ("lag", 1:12)
-        datatable (facMensal)
-    })
+    # Module facMensal
+    callModule(facMensal,"DNP",serieHistorica,desagregadoNP)
     
     output$volumeUtil_DNP = renderPrint ({
         print ("Serie historica")
         print (paste (volumeUtil (dadosDNP()$serieH, (input$Pregularizacao_DNP/100), TRUE), "m^3"))
 
         print ("Serie sintetica")
-        print (paste (volumeUtil (as.matrix(desagregadoNP), (input$Pregularizacao_DNP/100), TRUE), "m^3"))
+        print (paste (volumeUtil (as.matrix(desagregadoNaoP), (input$Pregularizacao_DNP/100), TRUE), "m^3"))
 
     })
     
@@ -1204,28 +1195,13 @@ function (input, output, session) {
       },
       content = function (file) {
         colunas = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
-        write.table(data.frame (desagregadoNP), file,
+        write.table(data.frame (desagregadoNaoP), file,
                     col.names = colunas,
                     row.names = F,
                     sep = ";",
                     dec = ",")
       }
     )
-    
-    output$downloadTabelaMensal_DNP = downloadHandler (
-      filename = function ( ) {
-        paste0 ("serieDNP_FACMensal", ".csv")
-      },
-      content = function (file) {
-        tabela = data.frame (autocorrelacaoMensal (desagregadoNP, 12))
-        colnames (tabela) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
-        rownames (tabela) = c (paste ("lag", 0:12))
-        write.table (tabela, file, col.names = NA, row.names = T,
-                     sep = ";",
-                     dec = ",")
-      }
-    )
-    
     
   })
   
