@@ -57,8 +57,8 @@ TabARMA = tabPanel("Modelo ARMA",
                               
                               hr ( ),
                               p (strong ("Coeficiente de Hurst")),
-                              verbatimTextOutput ("hurst_ARMA"),
-                              
+                              coeficienteHurstOutput("ARMA"),
+                  
                               hr(),
                               p (strong ("Soma Residual")),
                               verbatimTextOutput ("somaRes_ARMA")

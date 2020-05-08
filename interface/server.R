@@ -227,24 +227,8 @@ function (input, output, session) {
     # Module facMensal
     callModule(facMensal,"PMIX",serieHistorica,serieEscolhida)
     
-    # output$FACMensais = renderPlot ({
-    #   if (input$iniciar){
-    #     inicializaGraficoMENSAL (serieHist ( ), as.numeric (input$lagMensalMAX))
-    #     graficoFACMENSAL (serieHist ( ), as.numeric (input$lagMensalMAX), 'cornflowerblue')
-    #     graficoFACMENSAL (serieEscolhida ( ), as.numeric (input$lagMensalMAX), 'blue')
-    #   }
-    # })
-    # 
-    # 
-    # output$tabelaMensal = renderDataTable ({
-    #   if (input$iniciar){
-    #     facMensal = round(data.frame (autocorrelacaoMensal (serieEscolhida ( ), 12)[-1, ]),digits = 4)
-    #     colnames (facMensal) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
-    #     rownames (facMensal) = paste ("lag", 1:12)
-    #     datatable (facMensal)
-    #   }
-    # })
-    
+    callModule(coeficienteHurst,"PMIX-Mensal","Mensal",serieHistorica,serieEscolhida)
+    callModule(coeficienteHurst,"PMIX-Anual","Anual",serieHistoricaAnual,serieEscolhidaAnual)
     
     output$volumeUtil = renderPrint ({
       if(input$iniciar){
@@ -252,17 +236,6 @@ function (input, output, session) {
         print (paste (volumeUtil (serieHist ( ), (input$Pregularizacao/100), TRUE), "m^3"))
         print ("Serie sintetica")
         print (paste (volumeUtil (serieEscolhida ( ), (input$Pregularizacao/100), TRUE), "m^3"))
-      }
-    })
-      
-    
-    output$hurst = renderPrint ({
-      
-      if(input$iniciar){
-        print ("Serie historica")
-        print (isolate (Hurst (as.vector (serieHist ( )))))
-        print ("Serie sintetica")
-        print ((Hurst (as.vector (serieEscolhida ( )))))
       }
     })
     
@@ -287,21 +260,6 @@ function (input, output, session) {
                     dec = ",")
       }
     )
-    
-    
-    # output$downloadTabelaMensal = downloadHandler (
-    #   filename = function ( ) {
-    #     paste0 ("serie_", input$nSerie, "FACMensal", ".csv")
-    #   },
-    #   content = function (file) {
-    #     tabela = data.frame (autocorrelacaoMensal (serieEscolhida ( ), 12))
-    #     colnames (tabela) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
-    #     rownames (tabela) = c (paste ("lag", 0:12))
-    #     write.table (tabela, file, col.names = NA, row.names = T,
-    #                  sep = ";",
-    #                  dec = ",")
-    #   }
-    # )
     
   })
   
@@ -961,12 +919,7 @@ function (input, output, session) {
     
     callModule(facAnual,"ARMA",serieAnualHist_ARMA,serieSint_ARMA)
     
-    output$hurst_ARMA = renderPrint ({
-        print ("Serie historica")
-        print (isolate (Hurst (as.vector (serieAnualHist_ARMA ))))
-        print ("Serie sintetica")
-        print (hurst_ARMA())
-    })
+    callModule(coeficienteHurst,"ARMA","Anual",serieAnualHist_ARMA,serieSint_ARMA)
     
     output$volumeUtil_ARMA = renderPrint ({
         print ("Serie historica")
@@ -1167,18 +1120,19 @@ function (input, output, session) {
     serieHistorica = dadosDNP()$serieHist
     avaliacaoSint = callModule(avaliacaoMensal,"DNP",serieHistorica,desagregadoNP)
     
-    
-    output$hurst_DNP = renderPrint({
-      print(paste("Hurst Mensal: ",hurstMensal))
-      print(paste("Hurst Anual: ",hurstAnual))
-    })
-    
     # Module facAnual
     serieHistoricaAnual = dadosDNP()$serieHist_Anual
     callModule(facAnual,"DNP",serieHistoricaAnual,desagregadoNP_Anual)
     
     # Module facMensal
     callModule(facMensal,"DNP",serieHistorica,desagregadoNP)
+    
+    #Module coeficienteHurst
+    
+    #Foi necessario fazer esse ajuste na serie desagregaca, pois para calcular o hurst é necessario tem um vetor.
+    serieSintDNP = reactive(as.matrix(desagregadoNP()))
+    callModule(coeficienteHurst,"DNP-Mensal","Mensal",as.matrix(serieHistorica),serieSintDNP)
+    callModule(coeficienteHurst,"DNP-Anual","Anual",serieHistoricaAnual,desagregadoNP_Anual)
     
     output$volumeUtil_DNP = renderPrint ({
         print ("Serie historica")

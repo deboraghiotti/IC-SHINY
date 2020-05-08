@@ -89,11 +89,8 @@ TabPMIX = tabPanel ("Modelo PMIX",
                       ),
                       tabPanel("Graficos FAC mensais",
                                br ( ),
+                               # Module facMensal
                                facMensalOutput("PMIX")
-                               # selectInput ("lagMensalMAX", "lag mensal analisado:", choices = 1:12, selected = 1),
-                               # plotOutput ("FACMensais"),
-                               # dataTableOutput ("tabelaMensal"),
-                               # downloadButton ("downloadTabelaMensal", "Download FAC Mensal", icon ("save"))
                       ),
                       tabPanel("Medidas",
                                br ( ),
@@ -107,8 +104,9 @@ TabPMIX = tabPanel ("Modelo PMIX",
                                  )
                                ),
                                hr ( ),
-                               p (strong ("Coeficiente de Hurst")),
-                               verbatimTextOutput ("hurst")
+                               h3("Coeficiente de Hurst"),
+                               coeficienteHurstOutput("PMIX-Mensal"),
+                               coeficienteHurstOutput("PMIX-Anual")
                       )
                     ),
                     hr(),

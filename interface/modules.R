@@ -257,3 +257,37 @@ facMensal <- function(input,output,session,serieHist,serieSint){
   
 }
 
+
+# Module coeficienteHurst
+# UI: Exibe os resultados do coeficiente hurst sintetico e historico
+
+
+coeficienteHurstOutput <- function(id){
+  
+  # Criando o namespace
+  
+  ns <- NS(id)
+  
+  tagList(
+    
+    verbatimTextOutput (ns("hurst"))
+  )
+  
+  
+}
+
+coeficienteHurst <- function(input,output,session,tipo,serieHist,serieSint){
+  hurstHist = reactive(Hurst (as.vector (serieHist)))
+  hurstSint = reactive(Hurst (as.vector (serieSint( ))))
+  
+  output$hurst = renderPrint ({
+      print (paste("Hurst",tipo))
+      print (paste("Historico: ",hurstHist()))
+      print (paste("Sintetico:", hurstSint()))
+
+  })
+}
+
+
+
+

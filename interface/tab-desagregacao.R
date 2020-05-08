@@ -57,7 +57,6 @@ TabDesagregacao = tabPanel("Desagregacao",
                                     ),
                                     tabPanel("Medidas",
                                              br(),
-                                             verbatimTextOutput("hurst_DNP"),
                                              p (strong ("Calculo do volume util")),
                                              fluidRow (
                                                column (width = 6,
@@ -66,8 +65,11 @@ TabDesagregacao = tabPanel("Desagregacao",
                                                column (width = 6,
                                                        verbatimTextOutput ("volumeUtil_DNP")
                                                )
-                                             )
-                                             )
+                                             ),
+                                             
+                                             coeficienteHurstOutput("DNP-Mensal"),
+                                             coeficienteHurstOutput("DNP-Anual")
+                                    )
                                  ),
                                  hr(),
                                  downloadButton ("downloadSerie_DNP", "Download Serie", icon ("save"))
