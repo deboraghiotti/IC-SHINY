@@ -230,14 +230,8 @@ function (input, output, session) {
     callModule(coeficienteHurst,"PMIX-Mensal","Mensal",serieHistorica,serieEscolhida)
     callModule(coeficienteHurst,"PMIX-Anual","Anual",serieHistoricaAnual,serieEscolhidaAnual)
     
-    output$volumeUtil = renderPrint ({
-      if(input$iniciar){
-        print ("Serie historica")
-        print (paste (volumeUtil (serieHist ( ), (input$Pregularizacao/100), TRUE), "m^3"))
-        print ("Serie sintetica")
-        print (paste (volumeUtil (serieEscolhida ( ), (input$Pregularizacao/100), TRUE), "m^3"))
-      }
-    })
+    # Module volume
+    callModule(volume,"PMIX",TRUE,serieHistorica,serieEscolhida)
     
     ########## Mostrando os resultados para o usuario
     observe({
@@ -921,12 +915,8 @@ function (input, output, session) {
     
     callModule(coeficienteHurst,"ARMA","Anual",serieAnualHist_ARMA,serieSint_ARMA)
     
-    output$volumeUtil_ARMA = renderPrint ({
-        print ("Serie historica")
-        print (paste (volumeUtil (serieAnualHist_ARMA, (input$Pregularizacao_ARMA/100), FALSE), "m^3"))
-        print ("Serie sintetica")
-        print (paste (volume_ARMA(), "m^3"))
-    })
+    # Module volume
+    callModule(volume,"ARMA",FALSE,serieAnualHist_ARMA,serieSint_ARMA)
     
     output$somaRes_ARMA = renderPrint ({
       print (somaRes_ARMA())
@@ -1134,14 +1124,8 @@ function (input, output, session) {
     callModule(coeficienteHurst,"DNP-Mensal","Mensal",as.matrix(serieHistorica),serieSintDNP)
     callModule(coeficienteHurst,"DNP-Anual","Anual",serieHistoricaAnual,desagregadoNP_Anual)
     
-    output$volumeUtil_DNP = renderPrint ({
-        print ("Serie historica")
-        print (paste (volumeUtil (dadosDNP()$serieH, (input$Pregularizacao_DNP/100), TRUE), "m^3"))
-
-        print ("Serie sintetica")
-        print (paste (volumeUtil (as.matrix(desagregadoNaoP), (input$Pregularizacao_DNP/100), TRUE), "m^3"))
-
-    })
+    # Module volume
+    callModule(volume,"DNP","TRUE",as.matrix(serieHistorica),serieSintDNP)
     
     output$downloadSerie_DNP = downloadHandler (
       filename = function ( ) {

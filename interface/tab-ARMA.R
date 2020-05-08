@@ -45,22 +45,12 @@ TabARMA = tabPanel("Modelo ARMA",
                      ),
                      tabPanel("Medidas",
                               br ( ),
-                              p (strong ("Calculo do volume util")),
-                              fluidRow (
-                                column (width = 6,
-                                        sliderInput ("Pregularizacao_ARMA", "Porcentagem de regularizacao", min = 0, max = 100, value = 50, width = "100%")
-                                ),
-                                column (width = 6,
-                                        verbatimTextOutput ("volumeUtil_ARMA")
-                                )
-                              ),
-                              
+                              volumeOutput("ARMA"),
                               hr ( ),
-                              p (strong ("Coeficiente de Hurst")),
+                              h4 (strong ("Coeficiente de Hurst")),
                               coeficienteHurstOutput("ARMA"),
-                  
                               hr(),
-                              p (strong ("Soma Residual")),
+                              h4 (strong ("Soma Residual")),
                               verbatimTextOutput ("somaRes_ARMA")
                      )
                    ),

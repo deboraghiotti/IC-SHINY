@@ -94,19 +94,13 @@ TabPMIX = tabPanel ("Modelo PMIX",
                       ),
                       tabPanel("Medidas",
                                br ( ),
-                               p (strong ("Calculo do volume util")),
-                               fluidRow (
-                                 column (width = 6,
-                                         sliderInput ("Pregularizacao", "Porcentagem de regularizacao", min = 0, max = 100, value = 50, width = "100%")
-                                 ),
-                                 column (width = 6,
-                                         verbatimTextOutput ("volumeUtil")
-                                 )
-                               ),
-                               hr ( ),
-                               h3("Coeficiente de Hurst"),
-                               coeficienteHurstOutput("PMIX-Mensal"),
-                               coeficienteHurstOutput("PMIX-Anual")
+                               volumeOutput("PMIX"),
+                               hr(),
+                               h4(strong("Coeficiente de Hurst")),
+                               fluidRow(
+                                column(6,coeficienteHurstOutput("PMIX-Mensal")),
+                                column(6,coeficienteHurstOutput("PMIX-Anual"))
+                               )
                       )
                     ),
                     hr(),

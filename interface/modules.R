@@ -289,5 +289,41 @@ coeficienteHurst <- function(input,output,session,tipo,serieHist,serieSint){
 }
 
 
+volumeOutput <- function(id){
+  
+  ns <- NS(id)
+  
+  tagList(
+    h4(strong("Volume Util")),
+    fluidRow (
+      column (width = 6,
+              sliderInput (ns("porcentagemRegularizacao"), "Porcentagem de regularizacao", min = 0, max = 100, value = 50, width = "100%")
+      ),
+      column (width = 6,
+              verbatimTextOutput (ns("volumeUtil"))
+      )
+    ),
+  )
+  
+}
 
+# tipo: FALSE para series anuais e TRUE para series sinteticas
+volume <- function(input,output,session,tipo,serieHist,serieSint){
+  
+  volumeHist = reactive({
+      volumeUtil (serieHist, (input$porcentagemRegularizacao/100), tipo)
+  })
+  
+  volumeSint = reactive({
+    volumeUtil (serieSint(), (input$porcentagemRegularizacao/100), tipo)  
+  })
+  
+  output$volumeUtil = renderPrint ({
+    print ("Serie historica")
+    print (paste (volumeHist(), "m^3"))
+    print ("Serie sintetica")
+    print (paste (volumeSint(), "m^3"))
+  })
+  
+}
 

@@ -57,18 +57,13 @@ TabDesagregacao = tabPanel("Desagregacao",
                                     ),
                                     tabPanel("Medidas",
                                              br(),
-                                             p (strong ("Calculo do volume util")),
-                                             fluidRow (
-                                               column (width = 6,
-                                                       sliderInput ("Pregularizacao_DNP", "Porcentagem de regularizacao", min = 0, max = 100, value = 50, width = "100%")
-                                               ),
-                                               column (width = 6,
-                                                       verbatimTextOutput ("volumeUtil_DNP")
-                                               )
-                                             ),
-                                             
-                                             coeficienteHurstOutput("DNP-Mensal"),
-                                             coeficienteHurstOutput("DNP-Anual")
+                                             volumeOutput("DNP"),
+                                             hr(),
+                                             h4(strong("Coeficiente Hurst")),
+                                             fluidRow(
+                                              column(6,coeficienteHurstOutput("DNP-Mensal")),
+                                              column(6,coeficienteHurstOutput("DNP-Anual"))
+                                             )
                                     )
                                  ),
                                  hr(),
