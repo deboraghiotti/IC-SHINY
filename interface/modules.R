@@ -39,16 +39,16 @@ avaliacaoMensal <- function(input,output,session,serieHist,serieSint){
   })
 
   output$graficoSerie = renderPlot ({
-      inicializaGraficoSERIE(serieHist)
-      graficoSERIE (serieHist, 'cornflowerblue')
+      inicializaGraficoSERIE(serieHist())
+      graficoSERIE (serieHist(), 'cornflowerblue')
       graficoSERIE (serieSint(), 'blue')
   })
   
   output$tabelaAvaliacao = renderDataTable ({
-      mediaHist = apply (serieHist, 2, mean)
-      desvioHist = apply (serieHist, 2, sd)
+      mediaHist = reactive(apply (serieHist(), 2, mean))
+      desvioHist = reactive(apply (serieHist(), 2, sd))
       
-      medidas = round(data.frame (mediaHist, mediaSint(), desvioHist, desvioSint(),kurtSint(),assimetriaSint(),coefVarSint()),digits = 5)
+      medidas = round(data.frame (mediaHist(), mediaSint(), desvioHist(), desvioSint(),kurtSint(),assimetriaSint(),coefVarSint()),digits = 5)
       rownames (medidas) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
       colnames (medidas) = c ("Media Historica", "Media Sintetica", "Desvio-padrao Historico", "Desvio-padrao Sintetico","Indice Kurt","Assimetria","Coeficiente de Variacao")
       datatable (medidas)
@@ -103,17 +103,17 @@ avaliacaoAnual <- function(input,output,session,serieHistAnual,serieSintAnual){
   coefVarSint = reactive(desvioSint()/mediaSint())
   
   
-  mediaHist = mean (serieHistAnual)
-  desvioHist = sd (serieHistAnual)
-  kurtHist = kurtosis(serieHistAnual)
-  assimetriaHist = skewness(serieHistAnual)
-  coefVarHist = desvioHist/mediaHist
+  mediaHist = reactive(mean (serieHistAnual()))
+  desvioHist = reactive(sd (serieHistAnual()))
+  kurtHist = reactive(kurtosis(serieHistAnual()))
+  assimetriaHist = reactive(skewness(serieHistAnual()))
+  coefVarHist = reactive(desvioHist()/mediaHist())
   
-  media = c(mediaSint(),mediaHist)
-  desvio = c(desvioSint(),desvioHist)
-  kurt = c(kurtSint(),kurtHist)
-  assimetria = c(assimetriaSint(),assimetriaHist)
-  coefVar = c(coefVarSint(),coefVarHist)
+  media = c(mediaSint(),mediaHist())
+  desvio = c(desvioSint(),desvioHist())
+  kurt = c(kurtSint(),kurtHist())
+  assimetria = c(assimetriaSint(),assimetriaHist())
+  coefVar = c(coefVarSint(),coefVarHist())
   
   avaliacaoSintAnual = reactive({
     avaliacao = data.frame(mediaSint(),desvioSint(),kurtSint(),assimetriaSint(),coefVarSint())
@@ -141,7 +141,7 @@ avaliacaoAnual <- function(input,output,session,serieHistAnual,serieSintAnual){
                   col.names = NA)
     })
   
-  return(avaliacaoSintAnual())
+  return(avaliacaoSintAnual)
   
 }
 
@@ -174,8 +174,8 @@ facAnual <- function(input,output,session,serieHistAnual,serieSintAnual){
   
   
   output$graficoFacAnual = renderPlot ({
-      inicializaGraficoFACANUAL (serieHistAnual, 12)
-      graficoFACANUAL (serieHistAnual, 12, 'cornflowerblue')
+      inicializaGraficoFACANUAL (serieHistAnual(), 12)
+      graficoFACANUAL (serieHistAnual(), 12, 'cornflowerblue')
       graficoFACANUAL (serieSintAnual(), 12, 'blue')
   })
   
@@ -198,6 +198,8 @@ facAnual <- function(input,output,session,serieHistAnual,serieSintAnual){
                    sep = ";",
                    dec = ",")
     })
+  
+  return(acfAnual)
   
 }
 
@@ -230,8 +232,8 @@ facMensal <- function(input,output,session,serieHist,serieSint){
   })
   
   output$graficoFacMensal = renderPlot ({
-      inicializaGraficoMENSAL (serieHist, as.numeric (input$lagFacMensal))
-      graficoFACMENSAL (serieHist, as.numeric (input$lagFacMensal), 'cornflowerblue')
+      inicializaGraficoMENSAL (serieHist(), as.numeric (input$lagFacMensal))
+      graficoFACMENSAL (serieHist(), as.numeric (input$lagFacMensal), 'cornflowerblue')
       graficoFACMENSAL (serieSint(), as.numeric (input$lagFacMensal), 'blue')
   })
   
@@ -277,7 +279,7 @@ coeficienteHurstOutput <- function(id){
 }
 
 coeficienteHurst <- function(input,output,session,tipo,serieHist,serieSint){
-  hurstHist = reactive(Hurst (as.vector (serieHist)))
+  hurstHist = reactive(Hurst (as.vector (serieHist())))
   hurstSint = reactive(Hurst (as.vector (serieSint( ))))
   
   output$hurst = renderPrint ({
@@ -288,7 +290,9 @@ coeficienteHurst <- function(input,output,session,tipo,serieHist,serieSint){
   })
 }
 
-
+# Module volume
+# UI: slider para selecionar a porcentagem de regularicao e o volume sintetico e historico
+# server: tipo( FALSE para series anuais e TRUE para series sinteticas), a serie historica e a serie sintetica 
 volumeOutput <- function(id){
   
   ns <- NS(id)
@@ -311,7 +315,7 @@ volumeOutput <- function(id){
 volume <- function(input,output,session,tipo,serieHist,serieSint){
   
   volumeHist = reactive({
-      volumeUtil (serieHist, (input$porcentagemRegularizacao/100), tipo)
+      volumeUtil (serieHist(), (input$porcentagemRegularizacao/100), tipo)
   })
   
   volumeSint = reactive({
@@ -324,6 +328,8 @@ volume <- function(input,output,session,tipo,serieHist,serieSint){
     print ("Serie sintetica")
     print (paste (volumeSint(), "m^3"))
   })
+  
+  return(volumeSint)
   
 }
 

@@ -108,6 +108,9 @@ function (input, output, session) {
     apply (serieEscolhida ( ), 1, sum)
   })
   
+  volumePMIX <- callModule(volume,"PMIX",TRUE,serieHist,serieEscolhida)
+  
+  
   
   ############### ALGORITMO DO MODELO ###############
     
@@ -147,7 +150,7 @@ function (input, output, session) {
     # Module avaliacaoMensal
     serieHistorica = serieHist()
     serieSintetica = serieEscolhida()
-    avaliacaoSint = callModule(avaliacaoMensal,"PMIX",serieHistorica,serieEscolhida)
+    avaliacaoSint = callModule(avaliacaoMensal,"PMIX",serieHist,serieEscolhida)
     
     
     
@@ -222,17 +225,16 @@ function (input, output, session) {
     # Module facAnual
     serieHistoricaAnual = serieHistAnual()
     serieSinteticaAnual = serieEscolhidaAnual()
-    callModule(facAnual,"PMIX",serieHistoricaAnual,serieEscolhidaAnual)
+    callModule(facAnual,"PMIX",serieHistAnual,serieEscolhidaAnual)
     
     # Module facMensal
-    callModule(facMensal,"PMIX",serieHistorica,serieEscolhida)
+    callModule(facMensal,"PMIX",serieHist,serieEscolhida)
     
-    callModule(coeficienteHurst,"PMIX-Mensal","Mensal",serieHistorica,serieEscolhida)
-    callModule(coeficienteHurst,"PMIX-Anual","Anual",serieHistoricaAnual,serieEscolhidaAnual)
+    callModule(coeficienteHurst,"PMIX-Mensal","Mensal",serieHist,serieEscolhida)
+    callModule(coeficienteHurst,"PMIX-Anual","Anual",serieHistAnual,serieEscolhidaAnual)
     
     # Module volume
-    callModule(volume,"PMIX",TRUE,serieHistorica,serieEscolhida)
-    
+    #volumePMIX <- callModule(volume,"PMIX",TRUE,serieHistorica,serieEscolhida)
     ########## Mostrando os resultados para o usuario
     observe({
       funcaoAlgoritmo()
@@ -290,7 +292,7 @@ function (input, output, session) {
         acfMensal = data.frame (autocorrelacaoMensal (serieArmazenar, 12)[-1, ])
         
         #Tabela Volume
-        volumeArmazenar = volumeUtil (serieArmazenar, (input$Pregularizacao/100), TRUE)
+        volumeArmazenar = v
         
         #Tabela Hurst
         HurstMensalArmazenar = (Hurst (as.vector (serieArmazenar)))
@@ -840,6 +842,10 @@ function (input, output, session) {
     serieHist_ARMA = valorSH('',input$estacoes_ARMA)
   })
   
+  serieHistAnual_ARMA = reactive({
+    apply (serieHist_ARMA(), 1, sum)  
+  })
+  
   resultados_ARMA = reactive({
 
     progress <- shiny::Progress$new()
@@ -909,14 +915,14 @@ function (input, output, session) {
     ######### TabPanel: Avaliacoes
     
     #serieSinteticaAnual = serieSint_ARMA()
-    avaliacaoSintAnual = callModule(avaliacaoAnual,"ARMA",serieAnualHist_ARMA,serieSint_ARMA)
+    avaliacaoSintAnual = callModule(avaliacaoAnual,"ARMA",serieHistAnual_ARMA,serieSint_ARMA)
     
-    callModule(facAnual,"ARMA",serieAnualHist_ARMA,serieSint_ARMA)
+    callModule(facAnual,"ARMA",serieHistAnual_ARMA,serieSint_ARMA)
     
-    callModule(coeficienteHurst,"ARMA","Anual",serieAnualHist_ARMA,serieSint_ARMA)
+    callModule(coeficienteHurst,"ARMA","Anual",serieHistAnual_ARMA,serieSint_ARMA)
     
     # Module volume
-    callModule(volume,"ARMA",FALSE,serieAnualHist_ARMA,serieSint_ARMA)
+    callModule(volume,"ARMA",FALSE,serieHistAnual_ARMA,serieSint_ARMA)
     
     output$somaRes_ARMA = renderPrint ({
       print (somaRes_ARMA())
@@ -1019,37 +1025,55 @@ function (input, output, session) {
   output$SeriesDesagregacao <- DT::renderDataTable(SeriesDesagregacao,server = TRUE, selection = 'single')
   
   #Linha Selecionada da tabela SeriesDesagregacao para desagregar
-  dadosDNP = reactive({
-      input$SeriesDesagregacao_button
-      if(input$analise_DNP == 1){ 
-        selectedrowindex <<- input$SeriesDesagregacao_rows_selected[length(input$SeriesDesagregacao_rows_selected)]
-        selectedrowindex <<- as.numeric(selectedrowindex)
-    
-        idSerie_Sintetica <- (SeriesDesagregacao[selectedrowindex,ID])
-        modelo = (SeriesDesagregacao[selectedrowindex,modelo])
-        estacao = (SeriesDesagregacao[selectedrowindex,Estacao])
-        codigo = (SeriesDesagregacao[selectedrowindex,Codigo])
-    
-        serieSS = SeriesSinteica_Anuais(idSerie_Sintetica,modelo)
-        serieSS_Anual = apply (serieSS, 1, sum)
-    
-        serieH = buscarSH(codigo,estacao)
-        print(class(serieH))
-        serieHist = div_mensais(serieH)
-        serieHist_Anual = apply (serieHist, 1, sum)
-    
-        final = list (serieHist = serieHist, serieHist_Anual = serieHist_Anual, serieH = serieH$valor,serieSS = serieSS,serieSS_Anual = serieSS_Anual,idSerie_Sintetica = idSerie_Sintetica)
-      }else if(input$analise_DNP == 2){
-        serieH = data.frame(read.csv2(input$serieHArquivada$datapath))
-        colnames(serieH)=c("periodo","valor")
-        serieH = as.data.table(serieH)
-        serieHist = div_mensais(serieH)
-        serieHist_Anual = apply (serieHist, 1, sum)
-        
-        final = list (serieHist = serieHist, serieHist_Anual = serieHist_Anual, serieH = serieH$valor)
-      }
+  
+  idSerie_SinteticaDNP = reactive({
+    input$SeriesDesagregacao_button
+    if(input$analise_DNP == 1){ 
+      selectedrowindex <<- input$SeriesDesagregacao_rows_selected[length(input$SeriesDesagregacao_rows_selected)]
+      selectedrowindex <<- as.numeric(selectedrowindex)
+      idSerie_Sintetica <- (SeriesDesagregacao[selectedrowindex,ID]) 
+      print(idSerie_Sintetica)
+    }
     
   })
+  
+  serieHistDNP <- reactive({
+    input$SeriesDesagregacao_button
+    if(input$analise_DNP == 1){ 
+      selectedrowindex <<- input$SeriesDesagregacao_rows_selected[length(input$SeriesDesagregacao_rows_selected)]
+      selectedrowindex <<- as.numeric(selectedrowindex)
+      
+      estacao = (SeriesDesagregacao[selectedrowindex,Estacao])
+      codigo = (SeriesDesagregacao[selectedrowindex,Codigo])
+      
+      serieH = buscarSH(codigo,estacao)
+      serieHist = div_mensais(serieH)
+    }else if(input$analise_DNP == 2){
+      serieH = data.frame(read.csv2(input$serieHArquivada$datapath))
+      colnames(serieH)=c("periodo","valor")
+      serieH = as.data.table(serieH)
+      serieHist = div_mensais(serieH)
+    }
+  })
+  
+  serieHistAnualDNP <- reactive({
+    serieHist_Anual = apply (serieHistDNP(), 1, sum)  
+  })
+  
+  serieSintDNP <- reactive({
+    input$SeriesDesagregacao_button
+    if(input$analise_DNP == 1){ 
+      selectedrowindex <<- input$SeriesDesagregacao_rows_selected[length(input$SeriesDesagregacao_rows_selected)]
+      selectedrowindex <<- as.numeric(selectedrowindex)
+      
+      idSerie_Sintetica <- (SeriesDesagregacao[selectedrowindex,ID])
+      modelo = (SeriesDesagregacao[selectedrowindex,modelo])
+      serieSS = SeriesSinteica_Anuais(idSerie_Sintetica,modelo)
+
+    }
+    
+  })
+  
   
   desagregadoNP = reactive({
     input$SeriesDesagregacao_button
@@ -1058,7 +1082,7 @@ function (input, output, session) {
       on.exit(progress$close())
       progress$set(message = "Calculando a desagregacao nao-parametrica", value = 0)
       
-      desagregado <- desagrega_np(dadosDNP()$serieSS,dadosDNP()$serieHist)
+      desagregado <- desagrega_np(serieSintDNP(),serieHistDNP())
     }else if(input$analise_DNP == 2){
       colunas = c("x","JAN","FEV","MAR","ABR","MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ")
       desagregado <- read.csv2(input$serieDNPArquivada$datapath,sep=";",dec=",",col.names = colunas,header=TRUE)
@@ -1107,25 +1131,25 @@ function (input, output, session) {
     shinyjs::show("resultados_DNP")
     
     # Module avaliacaoMensal 
-    serieHistorica = dadosDNP()$serieHist
-    avaliacaoSint = callModule(avaliacaoMensal,"DNP",serieHistorica,desagregadoNP)
+    serieHistorica = serieHistDNP()
+    avaliacaoSint = callModule(avaliacaoMensal,"DNP",serieHistDNP,desagregadoNP)
     
     # Module facAnual
-    serieHistoricaAnual = dadosDNP()$serieHist_Anual
-    callModule(facAnual,"DNP",serieHistoricaAnual,desagregadoNP_Anual)
+    serieHistoricaAnual = serieHistAnualDNP()
+    callModule(facAnual,"DNP",serieHistAnualDNP,desagregadoNP_Anual)
     
     # Module facMensal
-    callModule(facMensal,"DNP",serieHistorica,desagregadoNP)
+    callModule(facMensal,"DNP",serieHistDNP,desagregadoNP)
     
     #Module coeficienteHurst
     
     #Foi necessario fazer esse ajuste na serie desagregaca, pois para calcular o hurst é necessario tem um vetor.
     serieSintDNP = reactive(as.matrix(desagregadoNP()))
-    callModule(coeficienteHurst,"DNP-Mensal","Mensal",as.matrix(serieHistorica),serieSintDNP)
-    callModule(coeficienteHurst,"DNP-Anual","Anual",serieHistoricaAnual,desagregadoNP_Anual)
+    callModule(coeficienteHurst,"DNP-Mensal","Mensal",reactive(as.matrix(serieHistDNP())),serieSintDNP)
+    callModule(coeficienteHurst,"DNP-Anual","Anual",serieHistAnualDNP,desagregadoNP_Anual)
     
     # Module volume
-    callModule(volume,"DNP","TRUE",as.matrix(serieHistorica),serieSintDNP)
+    callModule(volume,"DNP","TRUE",reactive(as.matrix(serieHistDNP())),serieSintDNP)
     
     output$downloadSerie_DNP = downloadHandler (
       filename = function ( ) {
@@ -1162,8 +1186,12 @@ function (input, output, session) {
       acfMensal = data.frame (autocorrelacaoMensal (desagregadoNP(), 12)[-1, ])
       acfAnual = data.frame (as.vector (autocorrelacaoAnual (desagregadoNP_Anual(), 12)[-1]))
       volume = volumeUtil (as.matrix(desagregadoNP()), (input$Pregularizacao_DNP/100), TRUE)
+      
+      selectedrowindex <<- input$SeriesDesagregacao_rows_selected[length(input$SeriesDesagregacao_rows_selected)]
+      selectedrowindex <- as.numeric(selectedrowindex)
+      idSerie_Sintetica <- (SeriesDesagregacao[selectedrowindex,ID])
     
-      idDesagregado = registrarSSDESAGREGACAO(dadosDNP()$idSerie_Sintetica,"N")
+      idDesagregado = registrarSSDESAGREGACAO(idSerie_Sintetica,"N")
       inserirSS_Desagregado(idDesagregado,desagregadoNP())
       inserirAvaliacaoDESAGREGACAO(idDesagregado,MediaArmazenar,DesvioArmazenar,AssimetriaArmazenar,KurtArmazenar,CoefVarArmazenar)
       inserirACF_MensalDESAGREGACAO(idDesagregado,acfMensal)
