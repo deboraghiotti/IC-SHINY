@@ -109,18 +109,18 @@ avaliacaoAnual <- function(input,output,session,serieHistAnual,serieSintAnual){
   assimetriaHist = reactive(skewness(serieHistAnual()))
   coefVarHist = reactive(desvioHist()/mediaHist())
   
-  media = c(mediaSint(),mediaHist())
-  desvio = c(desvioSint(),desvioHist())
-  kurt = c(kurtSint(),kurtHist())
-  assimetria = c(assimetriaSint(),assimetriaHist())
-  coefVar = c(coefVarSint(),coefVarHist())
+  media = reactive(c(mediaSint(),mediaHist()))
+  desvio = reactive(c(desvioSint(),desvioHist()))
+  kurt = reactive(c(kurtSint(),kurtHist()))
+  assimetria = reactive(c(assimetriaSint(),assimetriaHist()))
+  coefVar = reactive(c(coefVarSint(),coefVarHist()))
   
   avaliacaoSintAnual = reactive({
     avaliacao = data.frame(mediaSint(),desvioSint(),kurtSint(),assimetriaSint(),coefVarSint())
     colnames(avaliacao) = c("mediaSint","desvioSint","kurtSint","assimetriaSint","coefVarSint")
   })
   output$tabelaAvaliacaoAnual = renderDataTable({
-    medidas = data.frame (media,desvio,kurt,assimetria,coefVar)
+    medidas = data.frame (media(),desvio(),kurt(),assimetria(),coefVar())
     colnames (medidas) = c ("Media", "Desvio-padrao", "Indice Kurt","Assimetria","Coeficiente de Variacao")
     rownames(medidas) = c("Sintetico","Historico")
     datatable (medidas)
@@ -257,6 +257,8 @@ facMensal <- function(input,output,session,serieHist,serieSint){
                    dec = ",")
     })
   
+  return(acfMensal)
+  
 }
 
 
@@ -288,6 +290,8 @@ coeficienteHurst <- function(input,output,session,tipo,serieHist,serieSint){
       print (paste("Sintetico:", hurstSint()))
 
   })
+  
+  return(hurstSint)
 }
 
 # Module volume

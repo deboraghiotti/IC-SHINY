@@ -108,7 +108,13 @@ function (input, output, session) {
     apply (serieEscolhida ( ), 1, sum)
   })
   
+  # Avalicao da serie sintetica gerada pelo pmix
   volumePMIX <- callModule(volume,"PMIX",TRUE,serieHist,serieEscolhida)
+  avaliacaoMensalPMIX <- callModule(avaliacaoMensal,"PMIX",serieHist,serieEscolhida)
+  acfAnualPMIX <- callModule(facAnual,"PMIX",serieHistAnual,serieEscolhidaAnual)
+  acfMensalPMIX <- callModule(facMensal,"PMIX",serieHist,serieEscolhida)
+  hurstMensalPMIX <- callModule(coeficienteHurst,"PMIX-Mensal","Mensal",serieHist,serieEscolhida)
+  hurstAnualPMIX <- callModule(coeficienteHurst,"PMIX-Anual","Anual",serieHistAnual,serieEscolhidaAnual)
   
   
   
@@ -146,13 +152,6 @@ function (input, output, session) {
         
       }
     })
-    
-    # Module avaliacaoMensal
-    serieHistorica = serieHist()
-    serieSintetica = serieEscolhida()
-    avaliacaoSint = callModule(avaliacaoMensal,"PMIX",serieHist,serieEscolhida)
-    
-    
     
     output$tabelaAvaliacao = renderDataTable ({
       if (input$iniciar){
@@ -222,20 +221,6 @@ function (input, output, session) {
         add_paths(data = d, x = ~MAPEfacAnual, y = ~MAPEfacMensal, z = ~MAPEdp)
     })
     
-    # Module facAnual
-    serieHistoricaAnual = serieHistAnual()
-    serieSinteticaAnual = serieEscolhidaAnual()
-    callModule(facAnual,"PMIX",serieHistAnual,serieEscolhidaAnual)
-    
-    # Module facMensal
-    callModule(facMensal,"PMIX",serieHist,serieEscolhida)
-    
-    callModule(coeficienteHurst,"PMIX-Mensal","Mensal",serieHist,serieEscolhida)
-    callModule(coeficienteHurst,"PMIX-Anual","Anual",serieHistAnual,serieEscolhidaAnual)
-    
-    # Module volume
-    #volumePMIX <- callModule(volume,"PMIX",TRUE,serieHistorica,serieEscolhida)
-    ########## Mostrando os resultados para o usuario
     observe({
       funcaoAlgoritmo()
       shinyjs::show("resultados_PMIX")
@@ -858,6 +843,12 @@ function (input, output, session) {
   
   serieSint_ARMA = reactive(resultados_ARMA()$serieSintetica)
   
+  # Avaliacao da serie sintetica gerada pelo modelo ARMA
+  avaliacaoAnualARMA <- callModule(avaliacaoAnual,"ARMA",serieHistAnual_ARMA,serieSint_ARMA)
+  acfAnualARMA <- callModule(facAnual,"ARMA",serieHistAnual_ARMA,serieSint_ARMA)
+  hurstAnualARMA <- callModule(coeficienteHurst,"ARMA","Anual",serieHistAnual_ARMA,serieSint_ARMA)
+  volumeARMA <- callModule(volume,"ARMA",FALSE,serieHistAnual_ARMA,serieSint_ARMA)
+  
   avaliacoes_ARMA = reactive({
     if (input$goButton_ARMA)
       isolate ({
@@ -886,43 +877,6 @@ function (input, output, session) {
     shinyjs::enable("limparButton_ARMA")
     shinyjs::disable("goButton_ARMA")
     shinyjs::show("resultados_ARMA")
-    p_ARMA = input$p_ARMA
-    q_ARMA = input$q_ARMA
-    lags_ARMA = c(input$p_ARMA,input$q_ARMA)
-    nAnos_ARMA = input$nsint_ARMA
-    estacao_ARMA = input$estacoes_ARMA
-    
-    print(p_ARMA)
-    print(q_ARMA)
-    print(nAnos_ARMA)
-    print(estacao_ARMA)
-    
-    serieAnualHist_ARMA = apply (serieHist_ARMA(), 1, sum)
-
-    Media_ARMA = avaliacoes_ARMA()$Media
-    Desvio_ARMA = avaliacoes_ARMA()$Dp
-    Kurt_ARMA = avaliacoes_ARMA()$Kurt
-    Assimetria_ARMA = avaliacoes_ARMA()$Assimetria
-    CoefVar_ARMA = avaliacoes_ARMA()$Coef_Var
-    
-    MediaHist_ARMA = mean (serieAnualHist_ARMA)
-    DesvioHist_ARMA = sd (serieAnualHist_ARMA)
-    KurtHist_ARMA = kurtosis(serieAnualHist_ARMA)
-    AssimetriaHist_ARMA = skewness(serieAnualHist_ARMA)
-    CoefVarHist_ARMA = DesvioHist_ARMA/MediaHist_ARMA
-    
-    ######### Resultados
-    ######### TabPanel: Avaliacoes
-    
-    #serieSinteticaAnual = serieSint_ARMA()
-    avaliacaoSintAnual = callModule(avaliacaoAnual,"ARMA",serieHistAnual_ARMA,serieSint_ARMA)
-    
-    callModule(facAnual,"ARMA",serieHistAnual_ARMA,serieSint_ARMA)
-    
-    callModule(coeficienteHurst,"ARMA","Anual",serieHistAnual_ARMA,serieSint_ARMA)
-    
-    # Module volume
-    callModule(volume,"ARMA",FALSE,serieHistAnual_ARMA,serieSint_ARMA)
     
     output$somaRes_ARMA = renderPrint ({
       print (somaRes_ARMA())
@@ -938,12 +892,7 @@ function (input, output, session) {
                     row.names = F,
                     sep = ";",
                     dec = ",")
-      }
-    )
-    
-   
-    
-    
+      })
   })
   
   observeEvent(input$limparButton_ARMA,{
@@ -1095,6 +1044,15 @@ function (input, output, session) {
     apply (desagregadoNP(), 1, sum)
   })
   
+  # Avalicao da serie desagregada pela desagregacao nao-parametrica
+  avaliacaoMensalDNP <- callModule(avaliacaoMensal,"DNP",serieHistDNP,desagregadoNP)
+  acfAnualDNP <- callModule(facAnual,"DNP",serieHistAnualDNP,desagregadoNP_Anual)
+  acfMensalDNP <- callModule(facMensal,"DNP",serieHistDNP,desagregadoNP)
+  hurstMensalDNP <- callModule(coeficienteHurst,"DNP-Mensal","Mensal",reactive(as.matrix(serieHistDNP())),reactive(as.matrix(desagregadoNP())))
+  hurstAnualDNP <- callModule(coeficienteHurst,"DNP-Anual","Anual",serieHistAnualDNP,desagregadoNP_Anual)
+  volumeDNP <- callModule(volume,"DNP","TRUE",reactive(as.matrix(serieHistDNP())),reactive(as.matrix(desagregadoNP())))
+  
+  
   relatorioSint = reactive({
     input$SeriesDesagregacao_button
     
@@ -1130,27 +1088,6 @@ function (input, output, session) {
     
     shinyjs::show("resultados_DNP")
     
-    # Module avaliacaoMensal 
-    serieHistorica = serieHistDNP()
-    avaliacaoSint = callModule(avaliacaoMensal,"DNP",serieHistDNP,desagregadoNP)
-    
-    # Module facAnual
-    serieHistoricaAnual = serieHistAnualDNP()
-    callModule(facAnual,"DNP",serieHistAnualDNP,desagregadoNP_Anual)
-    
-    # Module facMensal
-    callModule(facMensal,"DNP",serieHistDNP,desagregadoNP)
-    
-    #Module coeficienteHurst
-    
-    #Foi necessario fazer esse ajuste na serie desagregaca, pois para calcular o hurst é necessario tem um vetor.
-    serieSintDNP = reactive(as.matrix(desagregadoNP()))
-    callModule(coeficienteHurst,"DNP-Mensal","Mensal",reactive(as.matrix(serieHistDNP())),serieSintDNP)
-    callModule(coeficienteHurst,"DNP-Anual","Anual",serieHistAnualDNP,desagregadoNP_Anual)
-    
-    # Module volume
-    callModule(volume,"DNP","TRUE",reactive(as.matrix(serieHistDNP())),serieSintDNP)
-    
     output$downloadSerie_DNP = downloadHandler (
       filename = function ( ) {
         paste("serieDNP.csv",sep="")
@@ -1162,8 +1099,7 @@ function (input, output, session) {
                     row.names = F,
                     sep = ";",
                     dec = ",")
-      }
-    )
+      })
     
   })
   
