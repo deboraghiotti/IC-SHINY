@@ -1015,40 +1015,12 @@ function (input, output, session) {
   hurstAnualDNP <- callModule(coeficienteHurst,"DNP-Anual","Anual",serieHistAnualDNP,desagregadoNP_Anual)
   volumeDNP <- callModule(volume,"DNP","TRUE",reactive(as.matrix(serieHistDNP())),reactive(as.matrix(desagregadoNP())))
   
-  
-  relatorioSint = reactive({
-    input$SeriesDesagregacao_button
-    
-    progress <- shiny::Progress$new()
-    on.exit(progress$close())
-    progress$set(message = "Calculando as estatisticas", value = 0)
-    
-    relatorio_estatistico(desagregadoNP())
-  })
-  
-  hurstDNP = reactive({
-    input$SeriesDesagregacao_button
-    
-    progress <- shiny::Progress$new()
-    on.exit(progress$close())
-    progress$set(message = "Calculando o hurst", value = 0)
-    
-    hurstMensal = Hurst (as.vector(as.matrix(desagregadoNP())))
-    hurstAnual = Hurst (as.vector(as.matrix(desagregadoNP_Anual())))
-    hurst = list(hurstAnual = hurstAnual,hurstMensal = hurstMensal)
-    
-  })
-  
   observeEvent(input$SeriesDesagregacao_button,{
+  
+    desagregadoNaoP = desagregadoNP()
     
     shinyjs::disable("SeriesDesagregacao_button")
     shinyjs::enable("limparButton_DNP")
-    
-    desagregadoNaoP = desagregadoNP()
-    relatorioSint = relatorioSint()
-    hurstAnual = hurstDNP()$hurstAnual
-    hurstMensal = hurstDNP()$hurstMensal
-    
     shinyjs::show("resultados_DNP")
     
     output$downloadSerie_DNP = downloadHandler (
@@ -1077,14 +1049,13 @@ function (input, output, session) {
     
     tryCatch({
       
-      MediaArmazenar = relatorioSint()$Medias
-      DesvioArmazenar = relatorioSint()$Desvio_Padrao
-      KurtArmazenar = relatorioSint()$Indice_Kurt
-      AssimetriaArmazenar = relatorioSint()$Assimetria
-      CoefVarArmazenar = relatorioSint()$Coef_Var
-      acfMensal = data.frame (autocorrelacaoMensal (desagregadoNP(), 12)[-1, ])
-      acfAnual = data.frame (as.vector (autocorrelacaoAnual (desagregadoNP_Anual(), 12)[-1]))
-      volume = volumeDNP()
+      MediaArmazenar = avaliacaoMensalDNP$media()  
+      DesvioArmazenar = avaliacaoMensalDNP$desvioPadrao() 
+      KurtArmazenar = avaliacaoMensalDNP$kurt() 
+      AssimetriaArmazenar = avaliacaoMensalDNP$assimetria() 
+      CoefVarArmazenar = avaliacaoMensalDNP$coefVar()  
+      acfMensal = data.frame (acfMensalDNP()[-1, ])
+      acfAnual = data.frame (as.vector (acfAnualDNP()[-1]))
       
       selectedrowindex <<- input$SeriesDesagregacao_rows_selected[length(input$SeriesDesagregacao_rows_selected)]
       selectedrowindex <- as.numeric(selectedrowindex)
@@ -1095,7 +1066,7 @@ function (input, output, session) {
       inserirAvaliacaoDESAGREGACAO(idDesagregado,MediaArmazenar,DesvioArmazenar,AssimetriaArmazenar,KurtArmazenar,CoefVarArmazenar)
       inserirACF_MensalDESAGREGACAO(idDesagregado,acfMensal)
       inserirACF_ANUALDESAGREGACAO(idDesagregado,acfAnual)
-      inserirHurstVolDESAGREGACAO(idDesagregado,hurstDNP()$hurstAnual,hurstDNP()$hurstMensal,volume)
+      inserirHurstVolDESAGREGACAO(idDesagregado,hurstAnualDNP(),hurstMensalDNP(),volumeDNP())
     },
     error = function(err) {
       shinyjs::hide("armazenando_msg_DNP")
