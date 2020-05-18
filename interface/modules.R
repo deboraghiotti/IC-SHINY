@@ -141,7 +141,7 @@ avaliacaoAnual <- function(input,output,session,serieHistAnual,serieSintAnual){
                   col.names = NA)
     })
   
-  return(avaliacaoSintAnual)
+  return(list(media = mediaSint,desvioPadrao = desvioSint,kurt = kurtSint,assimetria = assimetriaSint,coefVar = coefVarSint))
   
 }
 

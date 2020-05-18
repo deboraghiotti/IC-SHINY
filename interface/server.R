@@ -839,34 +839,16 @@ function (input, output, session) {
   serieSint_ARMA = reactive(resultados_ARMA()$serieSintetica)
   
   # Avaliacao da serie sintetica gerada pelo modelo ARMA
+  
   avaliacaoAnualARMA <- callModule(avaliacaoAnual,"ARMA",serieHistAnual_ARMA,serieSint_ARMA)
   acfAnualARMA <- callModule(facAnual,"ARMA",serieHistAnual_ARMA,serieSint_ARMA)
   hurstAnualARMA <- callModule(coeficienteHurst,"ARMA","Anual",serieHistAnual_ARMA,serieSint_ARMA)
   volumeARMA <- callModule(volume,"ARMA",FALSE,serieHistAnual_ARMA,serieSint_ARMA)
   
-  avaliacoes_ARMA = reactive({
-    if (input$goButton_ARMA)
-      isolate ({
-        Media_ARMA = mean (serieSint_ARMA())
-        Desvio_ARMA = sd (serieSint_ARMA())
-        Kurt_ARMA = kurtosis(serieSint_ARMA())
-        Assimetria_ARMA = skewness(serieSint_ARMA())
-        CoefVar_ARMA = Desvio_ARMA/Media_ARMA
-        
-        final = list (Media = Media_ARMA, Dp = Desvio_ARMA,Kurt = Kurt_ARMA,Assimetria = Assimetria_ARMA,Coef_Var = CoefVar_ARMA)
-      })
-  })
-  
-  hurst_ARMA = reactive(Hurst (as.vector (serieSint_ARMA())))
-  
-  #volume_ARMA = reactive(volumeUtil (serieSint_ARMA(), (input$Pregularizacao_ARMA/100), FALSE))
-  
   somaRes_ARMA = reactive({ 
     residuos = resultados_ARMA()$residuos
     somRes = sum(residuos^2)
   })
-  
-  acfAnual_ARMA = reactive(data.frame (as.vector (autocorrelacaoAnual (serieSint_ARMA() , 12)[-1])))
   
   observeEvent(input$goButton_ARMA,{
     shinyjs::enable("limparButton_ARMA")
@@ -911,29 +893,15 @@ function (input, output, session) {
       nAnos_ARMA = input$nsint_ARMA
       estacao_ARMA = input$estacoes_ARMA
       
-      print(p_ARMA)
-      print(q_ARMA)
-      print(nAnos_ARMA)
-      print(estacao_ARMA)
-      
-      MediaArmazenar = avaliacoes_ARMA()$Media
-      DesvioArmazenar = avaliacoes_ARMA()$Dp
-      KurtArmazenar = avaliacoes_ARMA()$Kurt
-      AssimetriaArmazenar = avaliacoes_ARMA()$Assimetria
-      CoefVarArmazenar = avaliacoes_ARMA()$Coef_Var
-      HurstArmazenar = hurst_ARMA()
+      MediaArmazenar = avaliacaoAnualARMA$media() 
+      DesvioArmazenar = avaliacaoAnualARMA$desvioPadrao() 
+      KurtArmazenar = avaliacaoAnualARMA$kurt() 
+      AssimetriaArmazenar = avaliacaoAnualARMA$assimetria() 
+      CoefVarArmazenar =  avaliacaoAnualARMA$coefVar() 
+      HurstArmazenar = hurstAnualARMA()  
       VolumeArmazenar = volumeARMA()
       somResArmazenar = somaRes_ARMA()
-      acfAnual = acfAnual_ARMA()
-      
-      print(paste("Media: ",MediaArmazenar))
-      print(paste("DP: ", DesvioArmazenar))
-      print(paste("Kurst: ", KurtArmazenar))
-      print(paste("Assimetria: ", AssimetriaArmazenar))
-      print(paste("CoefVar: ", CoefVarArmazenar))
-      print(paste("Hurst: ", HurstArmazenar))
-      print(paste("Volume: ", VolumeArmazenar))
-      print(paste("Acf Anual: ", acfAnual))
+      acfAnual = data.frame (as.vector (acfAnualARMA()[-1]))  
       
       idEstacao_ARMA <- findID(estacao,input$estacoes_ARMA)
       idSERIE_SINTETICA <- registrarSSARMA(p_ARMA,q_ARMA,nAnos_ARMA,idEstacao_ARMA)
