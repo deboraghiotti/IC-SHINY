@@ -239,8 +239,7 @@ function (input, output, session) {
                     row.names = F,
                     sep = ";",
                     dec = ",")
-      }
-    )
+      })
     
   })
   
@@ -256,32 +255,28 @@ function (input, output, session) {
     shinyjs::hide("error_armazenar")
     
     tryCatch({ 
-        serieArmazenar = funcaoAlgoritmo ( )$arqSeries
-        if (input$tipo == 2) {
-          serieArmazenar = serieArmazenar[[as.numeric (input$nSerie)]]
-        }
-        
-        serieArmazenarAnual = apply (serieEscolhida ( ), 1, sum)
+        serieArmazenar = serieEscolhida()
+        serieArmazenarAnual = serieEscolhidaAnual()
         
         #Tabela Avaliacao
-        MediaArmazenar = (apply (serieArmazenar, 2, mean))
-        DesvioArmazenar = (apply (serieArmazenar, 2, sd))
-        KurtArmazenar = (apply(serieArmazenar,2,kurtosis))
-        AssimetriaArmazenar = (apply(serieArmazenar,2,skewness))
-        CoefVarArmazenar = (DesvioArmazenar/MediaArmazenar)
+        MediaArmazenar = avaliacaoMensalPMIX$media() 
+        DesvioArmazenar = avaliacaoMensalPMIX$desvioPadrao() 
+        KurtArmazenar = avaliacaoMensalPMIX$kurt() 
+        AssimetriaArmazenar = avaliacaoMensalPMIX$assimetria() 
+        CoefVarArmazenar = avaliacaoMensalPMIX$coefVar() 
         
         #Tabela Acf_anual
-        acfAnual = data.frame (as.vector (autocorrelacaoAnual (serieArmazenarAnual, 12)[-1]))
+        acfAnual = data.frame (as.vector (acfAnualPMIX()[-1]))
         
         #Table Acf_Mensal
-        acfMensal = data.frame (autocorrelacaoMensal (serieArmazenar, 12)[-1, ])
+        acfMensal = data.frame (acfMensalPMIX()[-1, ])
         
         #Tabela Volume
-        volumeArmazenar = v
+        volumeArmazenar = volumePMIX()
         
         #Tabela Hurst
-        HurstMensalArmazenar = (Hurst (as.vector (serieArmazenar)))
-        HurstAnualArmazenar = (Hurst (as.vector (serieArmazenarAnual)))
+        HurstMensalArmazenar = hurstMensalPMIX()
+        HurstAnualArmazenar = hurstAnualPMIX()
         
         
         #Tabela soma_residual
@@ -864,7 +859,7 @@ function (input, output, session) {
   
   hurst_ARMA = reactive(Hurst (as.vector (serieSint_ARMA())))
   
-  volume_ARMA = reactive(volumeUtil (serieSint_ARMA(), (input$Pregularizacao_ARMA/100), FALSE))
+  #volume_ARMA = reactive(volumeUtil (serieSint_ARMA(), (input$Pregularizacao_ARMA/100), FALSE))
   
   somaRes_ARMA = reactive({ 
     residuos = resultados_ARMA()$residuos
@@ -927,7 +922,7 @@ function (input, output, session) {
       AssimetriaArmazenar = avaliacoes_ARMA()$Assimetria
       CoefVarArmazenar = avaliacoes_ARMA()$Coef_Var
       HurstArmazenar = hurst_ARMA()
-      VolumeArmazenar = volume_ARMA()
+      VolumeArmazenar = volumeARMA()
       somResArmazenar = somaRes_ARMA()
       acfAnual = acfAnual_ARMA()
       
@@ -1121,7 +1116,7 @@ function (input, output, session) {
       CoefVarArmazenar = relatorioSint()$Coef_Var
       acfMensal = data.frame (autocorrelacaoMensal (desagregadoNP(), 12)[-1, ])
       acfAnual = data.frame (as.vector (autocorrelacaoAnual (desagregadoNP_Anual(), 12)[-1]))
-      volume = volumeUtil (as.matrix(desagregadoNP()), (input$Pregularizacao_DNP/100), TRUE)
+      volume = volumeDNP()
       
       selectedrowindex <<- input$SeriesDesagregacao_rows_selected[length(input$SeriesDesagregacao_rows_selected)]
       selectedrowindex <- as.numeric(selectedrowindex)

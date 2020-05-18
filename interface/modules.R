@@ -69,7 +69,7 @@ avaliacaoMensal <- function(input,output,session,serieHist,serieSint){
                   col.names = NA)
     })
   
-  return(avaliacaoSint)
+  return(list(media = mediaSint,desvioPadrao = desvioSint,kurt = kurtSint,assimetria = assimetriaSint,coefVar = coefVarSint))
     
 }
 
