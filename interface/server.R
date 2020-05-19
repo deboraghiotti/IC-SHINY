@@ -2,6 +2,8 @@ source('mysql-functions.R')
 source('auxiliar.R')
 source('desagregacao.R')
 source('modelo/cenarioAnual.R')
+source('modules.R')
+
 library('data.table')
 library(e1071)
 library(shinyalert)
@@ -12,6 +14,7 @@ source('tab-series-geradas.R')
 source('tab-ARMA.R')
 source('tab-PMIX.R')
 source('tab-estacoes.R')
+
 
 function (input, output, session) {
   
@@ -123,9 +126,6 @@ function (input, output, session) {
     shinyjs::enable("limparButton_PMIX")
     shinyjs::disable("parametros_PMIX")
     shinyjs::disable("iniciar")
-    
-    inserirAvaliacao("S",2,avaliacaoMensalPMIX$media())
-    
     
     ########## Resultados da serie gerada pelo Modelo PMIX
     
@@ -277,7 +277,6 @@ function (input, output, session) {
         #Tabela Hurst
         HurstMensalArmazenar = hurstMensalPMIX()
         HurstAnualArmazenar = hurstAnualPMIX()
-        
         
         #Tabela soma_residual
         somReSint = NULL

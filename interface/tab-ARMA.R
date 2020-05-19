@@ -1,3 +1,4 @@
+source('modules.R')
 TabARMA = tabPanel("Modelo ARMA",
          sidebarLayout(
            sidebarPanel(

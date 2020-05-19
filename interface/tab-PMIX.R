@@ -1,5 +1,7 @@
 library(plotly)
 library(shinyalert)
+source('modules.R')
+
 TabPMIX = tabPanel ("Modelo PMIX",
           sidebarLayout(
             sidebarPanel (
