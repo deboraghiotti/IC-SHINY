@@ -30,7 +30,6 @@ div_mensais<-function(sH)
 { 
   qtd_ano_hist = nrow(sH[,1])/12  #Calcula, baseado no numero de linhas a quantidade de anos registrados no arquivo
   serie_hist = matrix(sH$valor, qtd_ano_hist,byrow = TRUE)#Quebra o dataframe em qtd_anos_hist partes(anos) e cada parte e convertida numa linha da nova tabela
-  print(qtd_ano_hist)
   anos = as.character(sH$periodo)
   anos = substr(anos, nchar(anos)-4+1, nchar(anos))
   anos = unique(anos)
@@ -40,10 +39,7 @@ div_mensais<-function(sH)
   colnames(serie_hist)=c("JAN","FEV","MAR","ABR","MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ")
   serie_hist=as.data.frame(serie_hist)                    #Nomeia linhas e colunas e converte a matriz em um dataframe
   ### !!! ainda tem que melhorar os graficos, titulo, etc
-  #boxplot(serie_hist,ylab = "VazÃµes MÃ©dias Mensais (mÂ³/s)")
-  
-  #plot(anos,apply(serie_hist,1,sum),type="b",main="VazÃµes Anuais",xlab = "Ano", ylab="VazÃµes (mÂ³/s)")
-  #print(serie_hist)
+ 
   return(serie_hist)
 }
 
@@ -264,24 +260,19 @@ desagrega_np<-function(serieSint,SeriesDadosHist)
   qtd_ano_hist = nrow(SeriesDadosHist) 
   qtd_ano_des = length(serieSint[,1])
   
-  # print(SeriesDadosHist)
-  # print(qtd_ano_hist)
-  # print(qtd_ano_des)
-  
   desagregado_final = data.frame()#Cria um data frame vazio que sera nossa serie anual 
-  print("1")
   ##################PRIMEIRA ITERACAO DE DESAGREGACAO##########################
   
   Anuais = data.frame(V1=apply(SeriesDadosHist,1,sum))#Dados as vazoes mensais, calcula as vazoes anuais
   Anuais_1 = rownames(Anuais)[1]
   primeiro_ano = rep(serieSint[1,1],length(Anuais))
-  print("2")
+
   
   delta_i = abs(primeiro_ano-Anuais)#Faz um vetor da diferenca(delta_i) do primeiro ano sintetico referente a vazao anual com todos os anos historicos( |X1-xi| )
   x=delta_i$V1
   Tabela = cbind(Anuais,delta_i$V1)#Faz uma tabela que relaciona ano, vazao anual historica e diferenca(delta_i)
   Tabela = Tabela[order(Tabela$delta_i),]#Ordena de forma crescente de delta_i
-  print("3")
+
   
   ############CALLCULO DE K E DO CWM####################
   K = floor(sqrt(length(delta_i$V1)))
@@ -298,28 +289,21 @@ desagrega_np<-function(serieSint,SeriesDadosHist)
       cwm[i]=cwm[i-1]+(1/i)/div
   }
   ################
-  print("4")
   
   random = runif(1) #Escolhe numero aleatorio no vetor de pesos cumulativos(cwm) e armazena na variavel 'random'
   
   posicao = which.min(abs(cwm - random)) #Armazena na variavel 'posicao' a posicao do numero escolhido no vetor cwm
   candidato = rownames(Tabela)[posicao] #Armazena o ano candidato a desagregacao na variavel 'candidato'
   
-  print("5")
   desagregado = SeriesDadosHist[candidato,]*(serieSint$anual[1]/(apply(SeriesDadosHist[candidato,],1,sum)))
-  #desagregado = c(desagregado[1,],TOTAL=sum(desagregado[1,]))
-  print("6")
-  
   desagregado_final = rbind(desagregado_final,desagregado)
   
-  print("7")
   
   ############FIM DA DESAGREGACAO DO ANO 1##############
   Tabela = Tabela[order(row.names(Tabela)),]
   ############DESAGREGACAO DOS OUTROS ANOS###########################
   fi_1 = 1/var(Anuais[2:qtd_ano_hist,1])
   fi_2 = 1/var(SeriesDadosHist$DEZ[2:qtd_ano_hist])
-  print("8")
   
   delta_i = numeric (qtd_ano_hist-1)
   for (j in 2:(nrow(serieSint)))
@@ -333,7 +317,6 @@ desagrega_np<-function(serieSint,SeriesDadosHist)
     Tabela = Anuais
     Tabela = Tabela[-1, ]
     Tabela = data.frame(Tabela)
-    #print(qtd_ano_hist)
     Tabela[,2] = rep(0, (qtd_ano_hist-1))
     rownames(Tabela) = row.names(Anuais)[-1]
     colnames(Tabela) = c("V1", "delta_i")
@@ -349,7 +332,6 @@ desagrega_np<-function(serieSint,SeriesDadosHist)
     
     
   }
-  print("9")
   rownames(desagregado_final) = NULL
   return(desagregado_final)
 }

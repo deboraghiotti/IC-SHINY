@@ -36,7 +36,7 @@ TabEstacoes = tabPanel ("Estacoes",
               )
             )
             ####################################################
-          ),
+          ,width = 3),
           mainPanel (
             titlePanel(h3("Consultar Estacao")),
             selectizeInput("consultaEstacoes",label="",choices=""),
@@ -57,7 +57,14 @@ TabEstacoes = tabPanel ("Estacoes",
                     tabPanel(
                       "Volume Util",
                       br(),
-                      verbatimTextOutput ("volumeUtilHist")
+                      fluidRow (
+                        column (width = 6,
+                                sliderInput ("porcentagemRegularizacaoHist", "Porcentagem de regularizacao", min = 0, max = 100, value = 50, width = "100%")
+                        ),
+                        column (width = 6,
+                                verbatimTextOutput ("volumeUtilHist")
+                        )
+                      ),
                       
                     ),
                     tabPanel(
@@ -86,5 +93,5 @@ TabEstacoes = tabPanel ("Estacoes",
                   fluidRow(column(12,
                                   actionButton("LimparButton", "   Limpar   ", class = "btn-primary"),
                                   actionButton("DeletarButton", "Delete", class = "btn-primary",style="background-color:#ff0000;border-color: #ff0000")))))
-          )
+          ,width = 9)
 )

@@ -116,8 +116,6 @@ function (input, output, session) {
   hurstMensalPMIX <- callModule(coeficienteHurst,"PMIX-Mensal","Mensal",serieHist,serieEscolhida)
   hurstAnualPMIX <- callModule(coeficienteHurst,"PMIX-Anual","Anual",serieHistAnual,serieEscolhidaAnual)
   
-  
-  
   ############### ALGORITMO DO MODELO ###############
     
   observeEvent(input$iniciar,{
@@ -125,6 +123,8 @@ function (input, output, session) {
     shinyjs::enable("limparButton_PMIX")
     shinyjs::disable("parametros_PMIX")
     shinyjs::disable("iniciar")
+    
+    inserirAvaliacao("S",2,avaliacaoMensalPMIX$media())
     
     
     ########## Resultados da serie gerada pelo Modelo PMIX
@@ -455,7 +455,7 @@ function (input, output, session) {
     print(infoEstacao)
     output$volumeUtilHist = renderPrint ({
       print ("Volume util")
-      print (paste (volumeUtil (serieHistConsulta ( ), (input$Pregularizacao/100), TRUE), "m^3"))
+      print (paste (volumeUtil (serieHistConsulta ( ), (input$porcentagemRegularizacaoHist/100), TRUE), "m^3"))
     })
     
     output$hurstHist = renderPrint ({
@@ -466,14 +466,14 @@ function (input, output, session) {
     output$tabelaAnualHist = renderDataTable ({
       facAnual = data.frame (as.vector (autocorrelacaoAnual (serieHistAnualConsulta ( ), 12)[-1]))
       rownames (facAnual) = paste ("lag", 1:12)
-      datatable (facAnual, colnames = NULL) # %>% formatStyle (backgroundColor = styleInterval (c (0, 1), c ('gray', 'yellow'))
+      datatable (facAnual, colnames = NULL) 
     })
     
     output$tabelaMensalHist = renderDataTable ({
       facMensal = data.frame (autocorrelacaoMensal (serieHistConsulta ( ), 12)[-1, ])
       colnames (facMensal) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
       rownames (facMensal) = paste ("lag", 1:12)
-      datatable (facMensal)
+      datatable (round(facMensal,digits = 5))
     })
     
     output$tabelaAvaliacaoHist = renderDataTable({
@@ -590,8 +590,7 @@ function (input, output, session) {
                         row.names = F,
                         sep = ";",
                         dec = ",")
-          }
-        )
+          })
         
         output$downloadAvaliacoes_Gerada = downloadHandler (
           filename = function ( ) {
@@ -611,8 +610,7 @@ function (input, output, session) {
                         dec = ",",
                         row.names = T,
                         col.names = NA)
-          }
-        )
+          })
         
         output$downloadTabelaAnual_Gerada = downloadHandler (
           filename = function ( ) {
@@ -625,8 +623,7 @@ function (input, output, session) {
             write.table (tabela, file, col.names = NA, row.names = T,
                          sep = ";",
                          dec = ",")
-          }
-        )
+          })
         
         output$downloadTabelaMensal_Gerada = downloadHandler (
           filename = function ( ) {
@@ -639,8 +636,7 @@ function (input, output, session) {
             write.table (tabela, file, col.names = NA, row.names = T,
                          sep = ";",
                          dec = ",")
-          }
-        )
+          })
         
     
   })
