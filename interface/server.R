@@ -13,11 +13,11 @@ library(e1071)
 library(shinyalert)
 library(plotly)
 
-source('tab-desagregacao.R')
-source('tab-series-geradas.R')
-source('tab-ARMA.R')
-source('tab-PMIX.R')
-source('tab-estacoes.R')
+source('tabs/tab-desagregacao.R')
+source('tabs/tab-series-geradas.R')
+source('tabs/tab-ARMA.R')
+source('tabs/tab-PMIX.R')
+source('tabs/tab-estacoes.R')
 
 
 function (input, output, session) {

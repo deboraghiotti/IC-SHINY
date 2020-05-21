@@ -1,3 +1,4 @@
+# TAB DA UI RELACIONADA AO MODELO PMIX
 library(plotly)
 library(shinyalert)
 source('modules.R')

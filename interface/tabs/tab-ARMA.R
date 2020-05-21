@@ -1,4 +1,6 @@
+# TAB DA UI RELACIONADA AO MODELO ARMA
 source('modules.R')
+
 TabARMA = tabPanel("Modelo ARMA",
          sidebarLayout(
            sidebarPanel(

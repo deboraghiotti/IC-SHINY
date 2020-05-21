@@ -21,17 +21,9 @@ source ('otimizacao/inicializaPop.R')
 source ('otimizacao/mecanismos.R')
 source ('otimizacao/tempo.R')
 
-source('tab-desagregacao.R')
-source('tab-series-geradas.R')
-source('tab-ARMA.R')
-source('tab-PMIX.R')
-source('tab-estacoes.R')
-
 algoritmo = function (input,serieH) {
   lags = c (input$p, input$q, input$P, input$Q)
-  #dados = input$file$datapath
-  #serieH = entrada (serieH)$serieH
-  
+
   if (input$tipo == 1) {
     inicio = Sys.time ( )
     arquivos = PMIX (serieH, lags)

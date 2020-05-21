@@ -1,4 +1,6 @@
+# TAB DA UI RELACIONADA AS SERIES GERADAS PELOS MODELOS (CONSULTA)
 source('auxiliar.R')
+
 TabSerieGeradas = tabPanel("Series Geradas",
          shinyjs::useShinyjs(),
          shinyjs::inlineCSS(appCSS),

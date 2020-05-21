@@ -1,4 +1,6 @@
+# TAB DA UI RELACIONADA AS ESTACOS (CADASTRO E CONSULTA)
 source('auxiliar.R')
+
 TabEstacoes = tabPanel ("Estacoes",
           sidebarPanel (
             
