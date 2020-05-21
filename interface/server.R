@@ -1,4 +1,8 @@
-source('mysql-functions.R')
+source('mysql/mysql-functions.R')
+source('mysql/mysql-pmix.R')
+source('mysql/mysql-arma.R')
+source('mysql/mysql-desagregacao.R')
+
 source('auxiliar.R')
 source('desagregacao.R')
 source('modelo/cenarioAnual.R')
@@ -48,39 +52,6 @@ function (input, output, session) {
     serieS = lapply (arqSeries, function (x)
       as.matrix (x))
     return (serieS)
-  })
-  
-  ##### Avaliacoes das series historica/ serie arquivada
-  
-  avaliacoes = reactive ({
-    mediaH = apply (serieHist ( ), 2, mean)
-    dpH = apply (serieHist ( ), 2, sd)
-    facAnualH = autocorrelacaoAnual (serieHist ( ), 12)[-1]
-    facMensalH = autocorrelacaoMensal (serieHist ( ), 12)[-1, ]
-    
-    MAPEMedia = NULL
-    MAPEDesvio = NULL
-    MAPEFacAnual = NULL
-    MAPEFacMensal = NULL
-    
-    avaliacoes = lapply (leituraSerie ( ), function (x) {
-      mediaS = apply (x, 2, mean)
-      dpS = apply (x, 2, sd)
-      facAnualS = autocorrelacaoAnual (x, 12)[-1]
-      facMensalS = autocorrelacaoMensal (x, 12)[-1, ]
-      
-      MAPEMedia = sum (abs ((mediaH - mediaS) / mediaH)) / 12
-      MAPEDesvio = sum (abs ((dpH - dpS)) / dpH) / 12
-      MAPEFacAnual = sum (abs ((facAnualH - facAnualS) / facAnualH)) / 12
-      MAPEFacMensal = sum (abs ((facMensalH - facMensalS) / facMensalH)) / (12*12)
-      c (MAPEMedia, MAPEDesvio, MAPEFacAnual, MAPEFacMensal)
-    })
-    
-    avaliacoes = matrix (unlist (avaliacoes), ncol = 4, byrow = T)
-    avaliacoes = data.frame (avaliacoes)
-    colnames (avaliacoes) = c ("MAPE media", "MAPE desvio", "MAPE FAC anual", "MAPE FAC mensal")
-    rownames (avaliacoes) = paste ("Serie", 1:length (input$serieArquivada$datapath))
-    return (avaliacoes)
   })
   
   ########## Funcao Algoritmo roda o modelo PMIX.

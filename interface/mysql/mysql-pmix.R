@@ -3,7 +3,7 @@
 # Funcao registrarSSPMIX: Armazena uma nova serie sintetica na table serie_sintetica do banco de dados
 # Input: input da UI
 # idEstacao: id da estacao que gerou a serie sintetica
-# Return: retorna o id da seria cadastrada na table serie_sintetica
+# Return: retorna o id da serie cadastrada na table serie_sintetica
 
 registrarSSPMIX <- function(input,idEstacao){
   
@@ -151,9 +151,9 @@ inserirACF_MensalSS <- function(id_SERIE_SINTETICA,acf_mensal){
   
 }
 
-# Funcao inserirACF_ANUALSS: Insere na table "acf_anual" do banco de dados a acf mensal da serie sintetica gerada pelo modelo PMIX.
-# id_SERIE_SINTETICA: id da serie sintetica que foi gerado na funcao registrarSSPMIX.
-# acf_anual: acf mensal calculada pelo module "facAnual"
+# Funcao inserirACF_ANUALSS: Insere na table "acf_anual" do banco de dados a acf anual da serie sintetica gerada pelo modelo PMIX/ARMA.
+# id_SERIE_SINTETICA: id da serie sintetica que foi gerado na funcao registrarSSPMIX/registrarSSARMA.
+# acf_anual: acf anual calculada pelo module "facAnual"
 
 inserirACF_ANUALSS <- function(id_SERIE_SINTETICA,acf_anual){
   
@@ -186,6 +186,7 @@ inserirACF_ANUALSS <- function(id_SERIE_SINTETICA,acf_anual){
 # somRes: soma residual calculada na funcaoAgoritmo
 # hurstAnual: hurst da serie sintetica agregada calculado pelo module "coeficienteHurst"
 # hurstMensal: hurt da serie sintetica calculado pelo module "coeficienteHurst"
+# volume: volume da serie sintetica calculado pelo module "volume"
 
 inserirSomHurstVol <- function(id_SERIE_SINTETICA,somRes,hurstAnual,hurstMensal,volume){
   

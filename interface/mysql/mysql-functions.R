@@ -1,21 +1,13 @@
-# Funções relacionadas ao Banco de Dados "modelagem_estocastica"
+# FUNCOES GERAIS RELACIONADAS AO BANCO DE DADOS "modelagem_estocastica"
 # Fonte: https://shiny.rstudio.com/articles/persistent-data-storage.html#mysql
 
 library(RMySQL)
 library('DT')
 library('data.table')
-source('mysql-pmix.R')
 
-options(mysql = list(
-  "host" = "localhost",
-  "user" = "root",
-  "password" = "labhidro"
-))
+# Funcao conectarDataBase: Realiza a conexao com o banco de dados "modelagem_estocastica"
+# Return: objeto db que abre a conexao com o banco de dados
 
-databaseName <- "modelagem_estocastica"
-
-# Essa função realiza a conexao com o banco de dados "modelagem_estocastica"
-# Output: objeto db
 conectarDataBase <- function(){
   
   db <- dbConnect(MySQL(),
@@ -28,36 +20,13 @@ conectarDataBase <- function(){
     
 }
 
-# Função "saveData" insere dados dentro do banco de dados
-saveData <- function(table,data){
-  
-  #Conectando com o banco de dados
-  db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host, 
-                  user = options()$mysql$user, 
-                  password = options()$mysql$password)
-  
-  #Construindo a query
-  query <- sprintf(
-    "INSERT INTO %s (%s) VALUES ('%s')",
-    table, 
-    paste(names(data), collapse = ", "),
-    paste(data, collapse = "', '")
-  )
-  
-  # Submetendo a query e desconectando do banco de dados
-  dbGetQuery(db, query)
-  dbDisconnect(db)
-}
+# Funcao loadData: Seleciona dados da uma table do banco de dados
+# table: nome da table que se deseja extrair os dados
+# Return: retorna os dados da table.
 
-
-# Função loadData seleciona dados do banco de Dados
 loadData <- function(table) {
   # Conectando com o banco de dados
-  db <- dbConnect(MySQL(),
-                  user = 'root',
-                  password = 'labhidro',
-                  host = 'localhost',
-                  dbname = 'modelagem_estocastica')
+  db <- conectarDataBase()
   
   # Construindo a query de seleção
   query <- sprintf("SELECT * FROM %s", table)
@@ -68,22 +37,21 @@ loadData <- function(table) {
   return(data)
 }
 
-#Funcao alterDataBase realiza a query dada no banco de dadoa
+# Funcao alterDataBase: realiza uma query no banco de dados
+# query: a query que se deseja executar no banco de dados
+# Retunr: Retorna o dado, caso a query seja de consulta
+
 alterDataBase <- function(query){
   # Conectando com o banco de dados
-  db <- dbConnect(MySQL(),
-                   user = 'root',
-                   password = 'labhidro',
-                   host = 'localhost',
-                   dbname = 'modelagem_estocastica'
-                   
-  )
+  db <- conectarDataBase()
   
   # Submetendo a query e desconectando do bando de dados
   data <- dbGetQuery(db, query)
   dbDisconnect(db)
   return(data)
 }
+
+# Funcao cadastroEstacao: Essa funcao realiza o cadastro de uma estacao no banco de dados (table estacao)
 
 cadastroEstacao <- function(nomeEstacao,codigoEstacao,rioEstacao,anosEstacao,areaEstacao,latEstacao,lngEstacao){
   
@@ -124,21 +92,9 @@ cadastroEstacao <- function(nomeEstacao,codigoEstacao,rioEstacao,anosEstacao,are
   
 }
 
-buscarEstacao <- function(nome,codigo){
-  if(!is.null(codigo) && (codigo != "") && (codigo != ' ')){
-    query <- paste("CALL ESTACAO_INFO(",codigo,")")
-    dadosList<-alterDataBase(query)
-    dadosDT <- setDT(dadosList)
-    return(dadosDT)
-  }else if(!is.null(nome) && (nome != "") && (nome != " ")){
-    nome <- paste("'",nome,"'",sep="")
-    query <- paste("CALL ESTACAO_INFO_NOME(",nome,")",sep="")
-    dadosList <- alterDataBase(query)
-    dadosDT <- setDT(dadosList)
-    return(dadosDT)
-  }
-
-}
+# Funcao infoEstacao: busca dos dados de uma estacao no banco de dados (table estacao)
+# nome: nome da estacao
+# Return: os dados da estacao 
 
 infoEstacao <- function(nome){
   nome <- paste("'",nome,"'",sep="")
@@ -148,7 +104,9 @@ infoEstacao <- function(nome){
   return(dadosDT)
 }
 
-#A fun??o tem uma prerequisito que o valor esteja na sua forma correta,isto ?, como int ou double um varchar
+# Funcao buscarID: faz uma consulta no banco de dados. Mais especificamente, busca um id de um registro no banco de dados.
+# Return: o id desejado
+
 buscarId <- function(id,table,atributo,valor){
   if(!is.null(valor) && (valor != "") 
      && !is.null(id) && (id != "") 
@@ -164,18 +122,17 @@ buscarId <- function(id,table,atributo,valor){
   return(NULL)
 }
 
-#CADASTRNADO A SERIE HISTORIA DE UMA ESTACAO
+# Funcao cadastrarSH: Insere a serie historica de uma estacao no banco de dados (table vazao)
+# fileSH: arquivo com a serie historica da estacao
+# codigoEstacao: codigo da estacao 
+
 cadastrarSH <- function(fileSH,codigoEstacao){
   if(!is.null(fileSH) && (fileSH != "") 
      && !is.null(codigoEstacao) && (codigoEstacao != "")){
     
     #Lendo o arquivo com a Serie Historica
     serie_historica = read.table(fileSH,head=T,sep = ";" , dec = ",")
-    db <- dbConnect(MySQL(),
-                    user = 'root',
-                    password = 'labhidro',
-                    host = 'localhost',
-                    dbname = 'modelagem_estocastica')
+    db <- conectarDataBase()
     
     #BUscando o id da estacao que se quer inserir a serie historica
     idEstacao <- buscarId("idESTACAO","ESTACAO","CODIGO",codigoEstacao)
@@ -199,6 +156,11 @@ cadastrarSH <- function(fileSH,codigoEstacao){
   }
 }
 
+# FUNCOES PARA CONSULTAR DADOS DE UMA ESTACAO (SERIE HISTORICA)
+# Funcoes: buscarSH, buscarACF_MENSAL, buscarACF_ANUAL, buscarHURST,  buscarAVALIACAO, buscarVOLUME, buscarSOMA_RESIDUAL e buscarSS
+# codigoEstacao: codigo da estacao
+# nomeEstacao: nome da estacao
+  
 buscarSH <- function(codigoEstacao, nomeEstacao){
   if(!is.null(codigoEstacao) && (codigoEstacao != "")){
     query <- paste("CALL ESTACAO_SERIE_HISTORICA(",codigoEstacao,")")
@@ -213,9 +175,7 @@ buscarSH <- function(codigoEstacao, nomeEstacao){
     return(dadosDT)
   }
 }
-
-  ##  FUNCOES RELACIONADAS A SERIE HISTORICA
-
+  
   buscarACF_MENSAL <- function(codigoEstacao, nomeEstacao){
     if(!is.null(codigoEstacao) && (codigoEstacao != "") && (codigoEstacao != " ")){
       query <- paste("CALL ESTACAO_ACF_MENSAL(",codigoEstacao,")")
@@ -321,11 +281,9 @@ buscarSH <- function(codigoEstacao, nomeEstacao){
     }
   }
   
-  
-  
-  
-  
-  ##  FUNCOES RELACIONADAS A SERIE SINTETICA 
+# FUNCOES PARA CONSULTAR DADOS DAS SERIES SINTETICAS
+# Funcoes: buscarDESAGREGADO_SS, buscarACF_MENSAL_SS, buscarACF_ANUAL_SS, buscarHURST_SS, buscarAVALIACAO_SS, buscarVOLUME_SS e buscarSOMARESIDUAL_SS  
+# idSerie_Sintetica: id da serie sintetica
   
   buscarDESAGREGADO_SS <- function(idSerieSintetica){
     if(!is.null(idSerieSintetica) && (idSerieSintetica != "") && (idSerieSintetica != " ")){
@@ -390,7 +348,10 @@ buscarSH <- function(codigoEstacao, nomeEstacao){
     }
   }
   
-  ##  FUNCOES RELACIONADAS A SERIE DESAGREGADA
+# FUNCOES PARA CONSULTAR DADOS DAS SERIES DESAGREGADAS
+# Funcoes: buscarACF_MENSAL_SD, buscarACF_ANUAL_SD, buscarHURST_SD, buscarAVALIACAO_SD, buscarVOLUME_SD e buscarSOMARESIDUAL_SD 
+# idDesagregado: id da serie desagregada
+  
   buscarACF_MENSAL_SD <- function(idDESAGREGADO){
     if(!is.null(idDESAGREGADO) && (idDESAGREGADO != "") && (idDESAGREGADO != " ")){
       query <- paste("CALL SD_ACF_MENSAL(",idDESAGREGADO,")")
@@ -445,6 +406,9 @@ buscarSH <- function(codigoEstacao, nomeEstacao){
     }
   }
   
+  # Funcao SeriesSinteticas: Pega os dados da table serie_sintetica
+  # Return: os dados da table serie_sintetica na forma de data table.
+  
   SeriesSinteticas <- function(){
     query <- paste("SELECT idSERIE_SINTETICA as 'ID',codigo as 'Codigo',nome as 'Estacao',modelo,lags,desagregado,metodo,SERIE_SINTETICA.anos as 'Anos',register_date as 'Data' FROM SERIE_SINTETICA, ESTACAO
 WHERE ID_ESTACAO = IDESTACAO;")
@@ -453,12 +417,18 @@ WHERE ID_ESTACAO = IDESTACAO;")
     return(dadosDT)
   }
   
+  # Funcao SeriesDesagregadas: Pega os dados da table desagregado
+  # Return: os dados da table desagregado na forma de data table
+  
   SeriesDesagregadas <- function(){
     query <- paste("SELECT idDESAGREGADO as 'ID',id_SERIE_SINTETICA as 'ID Serie Sintetica',parametrico,register_date as 'Data' FROM DESAGREGADO;")
     dadosList<-alterDataBase(query)
     dadosDT <- setDT(dadosList)
     return(dadosDT)
   }
+  
+  # Funcao SeriesSinteticas: Pega os dados da table estacao
+  # Return: os dados da table estacao na forma de data table
   
   Estacoes <- function(){
     query <- paste("SELECT * FROM ESTACAO;")
@@ -467,6 +437,8 @@ WHERE ID_ESTACAO = IDESTACAO;")
     return(dadosDT)
   }
   
+  # Funcao selectSerie_Sintetica: Pega uma serie sintetica (serie temporal) na table serie 
+  # idSerie_Sintetica: id da serie que se deseja pegar os dados
   
   selectSerie_Sintetica = function(idSerie_Sintetica){
     if(!is.null(idSerie_Sintetica)){
@@ -476,6 +448,9 @@ WHERE ID_ESTACAO = IDESTACAO;")
     }
   }
   
+  # Funcao selectSerie_Desagregada: Pega uma serie desagregada (serie temporal) na table serie 
+  # id_Desagregado: id da serie que se deseja pegar os dados
+  
   selectSerie_Desagregada = function(id_DESAGREGADO){
     if(!is.null(id_DESAGREGADO)){
       query <- paste("SELECT JAN, FEV,MAR,ABR,MAI,JUN,JUL,AGO,SEB,OUB,NOV,DEZ FROM SERIE WHERE id_DESAGREGADO = ",id_DESAGREGADO)
@@ -484,12 +459,40 @@ WHERE ID_ESTACAO = IDESTACAO;")
     }
   }
   
+  # Funcao SeriesSintetica_Anuais: Pega uma serie sintetica anual (que sera desagregada) na table serie/serie_anual 
+  # idSerieSintetica: id da serie que se deseja pegar os dados
+  # modelo: PMIX (serie esta na table "serie") OU ARMA (serie esta na table "serie_anual")
+  
+  SeriesSinteica_Anuais <- function(idSerieSintetica,modelo){
+    # Modelos : PMIX ou ARMA
+    if(modelo == "PMIX" && !is.null(idSerieSintetica)){
+      
+      query = paste("Select anual from serie where id_SERIE_SINTETICA=",idSerieSintetica)
+      serie = alterDataBase(query)
+      
+    }else if(modelo == "ARMA" && !is.null(idSerieSintetica)){
+      query = paste("Select anual from serie_anual where id_SERIE_SINTETICA=",idSerieSintetica)
+      serie = alterDataBase(query)
+    }
+    return(serie)
+  }
+  
+  # Funcoes para deletar as series do banco de dados
+  
+  # Funcao deleteSerieSS: deleta uma serie sintetica do banco de dados. Sempre que se deleta uma seria, suas avaliacoes
+  # nas tables acf_mensal, acf_anual, avaliacao, hurste, volume e soma residual tambem sao apagadas.
+  # idSerie_Sintetica: id da serie sintetica que deseja-se apagar.
+  
   deleteSerieSS =  function(idSerie_Sintetica){
     if(!is.null(idSerie_Sintetica)){
       query = paste("DELETE FROM SERIE_SINTETICA WHERE idSERIE_SINTETICA = ",idSerie_Sintetica)
       alterDataBase(query)
     }
   }
+  
+  # Funcao deleteSerieSD: deleta uma serie desagregada do banco de dados. Sempre que se deleta uma seria, suas avaliacoes
+  # nas tables acf_mensal, acf_anual, avaliacao, hurst e volume tambem sao apagadas.
+  # idDesagregado: id da serie desagregada que deseja-se apagar.
   
   deleteSerieSD =  function(idDesagregado){
     if(!is.null(idDesagregado)){
@@ -498,6 +501,11 @@ WHERE ID_ESTACAO = IDESTACAO;")
     }
   }
   
+  # Funcao deleteEstacao: deleta uma estacao do banco de dados. Sempre que se deleta uma estacao, suas avaliacoes
+  # nas tables acf_mensal, acf_anual, avaliacao, hurste, volume e soma residual tambem sao apagadas. As series geradas por aquela estacao
+  # tambem sao apagadas. CUIDADO AO USAR ESSA FUNCAO
+  # nome: nome da estacao que deseja-se apagar.
+  
   deleteEstacao =  function(nome){
     if(!is.null(nome)){
       query = paste("DELETE FROM ESTACAO WHERE nome = '",nome,"'",sep="")
@@ -505,291 +513,3 @@ WHERE ID_ESTACAO = IDESTACAO;")
     }
   }
   
-  ############################# TABPANEL: MODELO ARMA #############################
-  # A funcao registrarSSARMA armazena uma nova serie sintetica no banco de dados e retorna
-  # o idSERIE_SInNTETICA dessa nova serie na table serie_sintetica do banco de dados
-  
-  registrarSSARMA <- function(p,q,nsint,idEstacao){
-    
-    db <- conectarDataBase()
-    
-    modelo <- "ARMA"
-    anos <- nsint
-    lags <- (paste("(",p,",",q,")",sep=""))
-    desagregado <- "N"
-    metodo <- "Metodo dos Momentos"
-    
-    query <- paste("INSERT INTO SERIE_SINTETICA VALUES(NULL,'",modelo,"',",anos,",'",lags,"','",metodo,"','",desagregado,"',",idEstacao,",CURRENT_TIMESTAMP())",sep="")
-    data <- dbGetQuery(db, query)
-    
-    query <- "SELECT LAST_INSERT_ID();"
-    idSERIE_SINTETICA <- dbGetQuery(db, query)
-    dbDisconnect(db)
-    
-    return(idSERIE_SINTETICA)
-    
-  }
-  
-  #Funcao para inserir uma serie sintetica gerada pelo modelo ARMA no banco de dados
-  #Essa funcao recebe como parametro o id da serie sintetica
-  inserirSS_ARMA <- function(id_SERIE_SINTETICA,serie_sintetica){
-    
-    db <- conectarDataBase()
-    inicio <- Sys.time()
-    
-    query <- paste("SET AUTOCOMMIT = 0")
-    dbGetQuery(db,query)
-    query <- paste("START TRANSACTION")
-    dbGetQuery(db,query)
-    
-    for (i in 1:length(serie_sintetica)) {
-      anual <- serie_sintetica[i]
-      query <- paste("INSERT INTO SERIE_ANUAL VALUES (NULL",",",anual,",",id_SERIE_SINTETICA,")")
-      dbGetQuery(db,query)
-    }
-    
-    query <- paste("COMMIT")
-    dbGetQuery(db,query)
-    
-    fim <- Sys.time()
-    dbDisconnect(db)
-    
-  }
-  
-  inserirAvaliacaoSS_ARMA <- function(id_SERIE_SINTETICA,mediaSint,dpSint,assimeSint,kurtSint,coefSint){
-    
-    db <- conectarDataBase() 
-    inicio <- Sys.time()
-    
-    query <- paste("SET AUTOCOMMIT = 0")
-    dbGetQuery(db,query)
-    query <- paste("START TRANSACTION")
-    dbGetQuery(db,query)
-    mes <- 'ANUAL' 
-    query <- paste("INSERT INTO AVALIACAO(mes,media,dp,assimetria,ind_kurt,coef_var,id_SERIE_SINTETICA) 
-                     VALUES (","'",mes,"'",",",mediaSint,",",dpSint,",",assimeSint,",",kurtSint,",",coefSint,",",id_SERIE_SINTETICA,")")
-    dbGetQuery(db,query)
-    
-    query <- paste("COMMIT")
-    dbGetQuery(db,query)
-    
-    fim <- Sys.time()
-    dbDisconnect(db)
-    
-  }
-  
-  
-  inserirSomHurst_ARMA<- function(id_SERIE_SINTETICA,somRes,hurstAnual){
-    
-    db <- conectarDataBase()   
-    inicio <- Sys.time()
-    
-    query <- paste("INSERT INTO SOMA_RESIDUAL VALUES(NULL,",somRes,",NULL,",id_SERIE_SINTETICA,",NULL)")
-    dbGetQuery(db,query)
-    
-    query <- paste("INSERT INTO HURST VALUES(NULL,",hurstAnual,",NULL,NULL,",id_SERIE_SINTETICA,",NULL)")
-    dbGetQuery(db,query)
-    
-    fim <- Sys.time()
-    dbDisconnect(db)
-    
-  }
-  
-  inserirVol_ARMA<- function(id_SERIE_SINTETICA,volume){
-    
-    db <- conectarDataBase()   
-    inicio <- Sys.time()
-  
-    query <- paste("INSERT INTO VOLUME VALUES(NULL,",volume,",NULL,",id_SERIE_SINTETICA,",NULL)")
-    dbGetQuery(db,query)
-    
-    fim <- Sys.time()
-    dbDisconnect(db)
-    
-  }
-  
-  
-  SeriesSinteica_Anuais <- function(idSerieSintetica,modelo){
-    # Modelos : PMIX ou ARMA
-    if(modelo == "PMIX" && !is.null(idSerieSintetica)){
-      
-      query = paste("Select anual from serie where id_SERIE_SINTETICA=",idSerieSintetica)
-      serie = alterDataBase(query)
-       
-    }else if(modelo == "ARMA" && !is.null(idSerieSintetica)){
-      query = paste("Select anual from serie_anual where id_SERIE_SINTETICA=",idSerieSintetica)
-      serie = alterDataBase(query)
-    }
-    return(serie)
-  }
-  
-  
-  ############################# TABPANEL: DESAGREGACAO #############################
-  
-  # A funcao registrarSSDESAGREGACAO armazena uma nova serie sintetica no banco de dados e retorna
-  # o idDESAGREGADO dessa nova serie na table serie_sintetica do banco de dados
-  # Parametros de entrada: 
-  # > idSerie_Sintetica = o id da serie sintetica que foi desagregada 
-  # > parametrico: 'S' ou 'N' indicando se a serie ? parametrica(S) ou nao-parametrica(N)
-  
-  registrarSSDESAGREGACAO <- function(idSerie_Sintetica,parametrico){
-    
-    db <- conectarDataBase()
-    query <- paste("INSERT INTO DESAGREGADO VALUES(NULL,'",parametrico,"',",idSerie_Sintetica," ,CURRENT_TIMESTAMP())",sep="")
-    data <- dbGetQuery(db, query)
-    
-    query <- "SELECT LAST_INSERT_ID();"
-    idSERIE_SINTETICA <- dbGetQuery(db, query)
-    dbDisconnect(db)
-    
-    return(idSERIE_SINTETICA)
-    
-  } 
-  
-  
-  inserirSS_Desagregado <- function(id_Desagregado,serie_sintetica){
-    
-    db <- conectarDataBase()
-    inicio <- Sys.time()
-    
-    query <- paste("SET AUTOCOMMIT = 0")
-    dbGetQuery(db,query)
-    query <- paste("START TRANSACTION")
-    dbGetQuery(db,query)
-    
-    for (i in 1:nrow(serie_sintetica)) {
-      jan <- serie_sintetica[i,1]
-      fev <- serie_sintetica[i,2]
-      mar <- serie_sintetica[i,3]
-      abr <- serie_sintetica[i,4]
-      mai <- serie_sintetica[i,5]
-      jun <- serie_sintetica[i,6]
-      jul <- serie_sintetica[i,7]
-      ago <- serie_sintetica[i,8]
-      seb <- serie_sintetica[i,9]
-      oub <- serie_sintetica[i,10]
-      nov <- serie_sintetica[i,11]
-      dez <- serie_sintetica[i,12]
-      anual <- jan + fev + mar + abr+ mai + jun + jul + ago + seb + oub + nov + dez
-      query <- paste("INSERT INTO SERIE VALUES (NULL",",",jan,",",fev,",",mar,",",abr,",",mai,
-                     ",",jun,",",jul,",",ago,",",seb,",",oub,",",nov,",",dez,",",anual,",NULL,",id_Desagregado,")")
-      dbGetQuery(db,query)
-    }
-    
-    query <- paste("COMMIT")
-    dbGetQuery(db,query)
-    
-    fim <- Sys.time()
-    dbDisconnect(db)
-    
-  }
-  
-  inserirAvaliacaoDESAGREGACAO <- function(id_DESAGREGADO,mediaSint,dpSint,assimeSint,kurtSint,coefSint){
-    
-    db <- conectarDataBase()
-    inicio <- Sys.time()
-    
-    query <- paste("SET AUTOCOMMIT = 0")
-    dbGetQuery(db,query)
-    query <- paste("START TRANSACTION")
-    dbGetQuery(db,query)
-    
-    meses <- c("JAN","FEV","MAR","ABR","MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ")
-    for(i in 1:12){
-      mes <- meses[i]
-      media <- mediaSint[i]
-      dp <- dpSint[i]
-      assimetria <- assimeSint[i]
-      kurt <- kurtSint[i]
-      coef_var <- coefSint[i]
-      
-      query <- paste("INSERT INTO AVALIACAO(mes,media,dp,assimetria,ind_kurt,coef_var,id_DESAGREGADO) VALUES(","'",mes,"'",",",media,",",dp,",",assimetria,",",kurt,",",coef_var,",",id_DESAGREGADO,")")
-      dbGetQuery(db,query)
-    }
-    
-    query <- paste("COMMIT")
-    dbGetQuery(db,query)
-    
-    fim <- Sys.time()
-    dbDisconnect(db)
-    
-  }
-  
-  inserirACF_MensalDESAGREGACAO <- function(id_DESAGREGADO,acf_mensal){
-    
-    db <- conectarDataBase()
-    inicio <- Sys.time()
-    
-    query <- paste("SET AUTOCOMMIT = 0")
-    dbGetQuery(db,query)
-    query <- paste("START TRANSACTION")
-    dbGetQuery(db,query)
-    
-    for (i in 1:nrow(acf_mensal)) {
-      lag <- i
-      v1 <- acf_mensal[i,1]
-      v2 <- acf_mensal[i,2]
-      v3 <- acf_mensal[i,3]
-      v4 <- acf_mensal[i,4]
-      v5 <- acf_mensal[i,5]
-      v6 <- acf_mensal[i,6]
-      v7 <- acf_mensal[i,7]
-      v8 <- acf_mensal[i,8]
-      v9 <- acf_mensal[i,9]
-      v10 <- acf_mensal[i,10]
-      v11 <- acf_mensal[i,11]
-      v12 <- acf_mensal[i,12]
-      
-      query <- paste("INSERT INTO ACF_MENSAL VALUES (","NULL",",",lag,",",v1,",",v2,",",v3,",",v4,",",v5,",",v6,",",v7,",",v8,",",v9,",",v10,",",v11,",",v12,",NULL,NULL,",id_DESAGREGADO,")")
-      dbGetQuery(db,query)
-    }
-    query <- paste("COMMIT")
-    dbGetQuery(db,query)
-    
-    fim <- Sys.time()
-    dbDisconnect(db)
-    
-  }
-  
-  inserirACF_ANUALDESAGREGACAO <- function(id_DESAGREGADO,acf_anual){
-    
-    db <- conectarDataBase()
-    inicio <- Sys.time()
-    query <- paste("SET AUTOCOMMIT = 0")
-    dbGetQuery(db,query)
-    query <- paste("START TRANSACTION")
-    dbGetQuery(db,query)
-    
-    for (i in 1:nrow(acf_anual)) {
-      lag <- i
-      valor <- acf_anual[i,1]
-      
-      query <- paste("INSERT INTO ACF_ANUAL VALUES(NULL,",valor,",",lag,",NULL,NULL,",id_DESAGREGADO,")")
-      dbGetQuery(db,query)
-    }
-    
-    query <- paste("COMMIT")
-    dbGetQuery(db,query)
-    
-    
-    fim <- Sys.time()
-    dbDisconnect(db)
-  }
-  
-  inserirHurstVolDESAGREGACAO<- function(id_Desagregado,hurstAnual,hurstMensal,volume){
-    
-    db <- conectarDataBase()
-    inicio <- Sys.time()
-    
-    
-    query <- paste("INSERT INTO HURST VALUES(NULL,",hurstAnual,",",hurstMensal,",NULL,NULL,",id_Desagregado,")")
-    dbGetQuery(db,query)
-    
-    query <- paste("INSERT INTO VOLUME VALUES(NULL,",volume,",NULL,NULL,",id_Desagregado,")")
-    dbGetQuery(db,query)
-    
-    fim <- Sys.time()
-    dbDisconnect(db)
-    
-  }
- 
