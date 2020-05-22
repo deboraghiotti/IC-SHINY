@@ -1,6 +1,5 @@
 #Funcoes auxiliares
 
-fieldsMandatory <- c("nomeEstacao", "codigoEstacao","fileSH")
 camposConsultaEstacao <- c("codigo","nome")
 camposConsultaSS <- c("nomeResultados","codigoResultados")
 
@@ -20,7 +19,7 @@ findID <-function(table,nome){
       id = table$idESTACAO[i]
     }
   }
-  id
+  return(id)
 }
 
 valorSH <- function(codigoEstacao, nomeEstacao){
@@ -28,7 +27,6 @@ valorSH <- function(codigoEstacao, nomeEstacao){
   serieHistorica = serieHistorica[,2]
   serieHistorica$valor <- as.numeric(serieHistorica$valor)
   serieFinal = matrix(serieHistorica$valor,ncol=12,byrow=T)
-  #print(serieFinal)
   return(serieFinal)
 }
 

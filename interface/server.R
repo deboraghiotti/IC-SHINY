@@ -216,11 +216,7 @@ function (input, output, session) {
   
   
   observeEvent(input$armazenarBD,{
-    #Data no formato para o armazenamento no mysql
-    #format(Sys.time(),"%Y-%m-%d %H:%M:%S")
-    
-    #Por enquanto apenas o PMIX e calculado
-    
+ 
     shinyjs::disable("armazenarBD")
     shinyjs::show("armazenando_msg")
     shinyjs::hide("error_armazenar")
@@ -289,9 +285,6 @@ function (input, output, session) {
     shinyjs::disable("limparButton_PMIX")
     shinyjs::hide("resultados_PMIX")
     shinyjs::reset("resultados_PMIX")
-    
-    
-    output$tabelaMedias = renderDataTable ({})
     output$tabelaAvaliacao = renderDataTable ({})
     
   })
@@ -330,28 +323,16 @@ function (input, output, session) {
     }
   })
   
-  observe ({
-      updateSelectInput (session, "nSerieA",
-                         choices = 1:length (input$serieArquivada$datapath),
-                         selected = length (input$serieArquivada$datapath)
-      )
-  })
-
   
   ############################### TABPANEL: DADOS HISTORICOS ##############################
   #################### CADASTRO DE UMA ESTACAO ######################
   observe({
-    # Checando se todos os campos obrigatorios possuem um valor
-    mandatoryFilled <-
-      vapply(fieldsMandatory,
-             function(x) {
-               !is.null(input[[x]]) && input[[x]] != ""
-             },
-             logical(1))
+    # Campos obrigatorios para cadastrar uma estacao: nome, codigo e o arquivo com a serie historica
+    camposObrigatorios <- c("nomeEstacao", "codigoEstacao","fileSH")
+    mandatoryFilled <- vapply(camposObrigatorios,function(x) {!is.null(input[[x]]) && input[[x]] != ""},logical(1))
     mandatoryFilled <- all(mandatoryFilled)
-    
-    # enable/disable the submit button
-    shinyjs::toggleState(id = "cadastrar", condition = mandatoryFilled)
+    # Se todos os campos forem completados, o botao de cadastrar é habiltado
+     shinyjs::toggleState(id = "cadastrar", condition = mandatoryFilled)
   })
   
   observeEvent(input$cadastrar,{
@@ -484,20 +465,6 @@ function (input, output, session) {
   
   ################################# TABPANEL SERIES GERADAS #################################
   
-  observe({
-    # Checando se todos os campos obrigatorios possuem um valor
-    camposPreenchidos <-
-      vapply(camposConsultaSS,
-             function(x) {
-               !is.null(input[[x]]) && input[[x]] != "" && input[[x]] != ' '
-             },
-             logical(1))
-    camposPreenchidos <- any(camposPreenchidos)
-    
-    # enable/disable the submit button
-    shinyjs::toggleState(id = "consultar_resultados_button", condition = camposPreenchidos)
-  })
-  
   SSTable <- SeriesSinteticas()
   SDTable <- SeriesDesagregadas()
   output$SeriesSinteticas<- DT::renderDataTable(SSTable,server = TRUE, selection = 'single')
@@ -515,39 +482,35 @@ function (input, output, session) {
     serieHistorica <- valorSH('',nomeEstacao)
     serieSintetica = selectSerie_Sintetica(idSerieSintetica)
     
-    print(selectedrowindex)
-    print(idSerieSintetica)
-    
     shinyjs::show("ss_resultados")
     shinyjs::show("grafico_ss_panel")
     output$GraficoSS = renderPlot ({
       inicializaGraficoSERIE (serieHistorica)
       graficoSERIE (serieSintetica, 'cornflowerblue')
       graficoSERIE (serieHistorica, 'blue')
-            
 
     })
       
-        shinyjs::show("acf_mensal_ss_panel")
-        acfMensal = buscarACF_MENSAL_SS(idSerieSintetica)
-        output$AcfMensal_SS_Table <- DT::renderDataTable(acfMensal)
+    shinyjs::show("acf_mensal_ss_panel")
+    acfMensal = buscarACF_MENSAL_SS(idSerieSintetica)
+    output$AcfMensal_SS_Table <- DT::renderDataTable(acfMensal)
       
-        shinyjs::show("acf_anual_ss_panel")
-        acfAnual <- buscarACF_ANUAL_SS(idSerieSintetica)
-        output$AcfAnual_SS_Table <- DT::renderDataTable(acfAnual)
+    shinyjs::show("acf_anual_ss_panel")
+    acfAnual <- buscarACF_ANUAL_SS(idSerieSintetica)
+    output$AcfAnual_SS_Table <- DT::renderDataTable(acfAnual)
       
-        shinyjs::show("hurst_ss_panel")
-        output$Hurst_SS_Table <- DT::renderDataTable(buscarHURST_SS(idSerieSintetica))
+    shinyjs::show("hurst_ss_panel")
+    output$Hurst_SS_Table <- DT::renderDataTable(buscarHURST_SS(idSerieSintetica))
       
-        #shinyjs::show("avaliacao_ss_panel")
-        avaliacoes <- buscarAVALIACAO_SS(idSerieSintetica)
-        output$Avaliacao_SS_Table <- DT::renderDataTable(avaliacoes)
+    #shinyjs::show("avaliacao_ss_panel")
+    avaliacoes <- buscarAVALIACAO_SS(idSerieSintetica)
+    output$Avaliacao_SS_Table <- DT::renderDataTable(avaliacoes)
       
-        shinyjs::show("volume_ss_panel")
-        output$Volume_SS_Table <- DT::renderDataTable(buscarVOLUME_SS(idSerieSintetica))
+    shinyjs::show("volume_ss_panel")
+    output$Volume_SS_Table <- DT::renderDataTable(buscarVOLUME_SS(idSerieSintetica))
       
-        shinyjs::show("soma_ss_panel")
-        output$Soma_SS_Table <- DT::renderDataTable(buscarSOMARESIDUAL_SS(idSerieSintetica))
+    shinyjs::show("soma_ss_panel")
+    output$Soma_SS_Table <- DT::renderDataTable(buscarSOMARESIDUAL_SS(idSerieSintetica))
         
         output$downloadSerie_Gerada = downloadHandler (
           filename = function ( ) {
@@ -612,7 +575,6 @@ function (input, output, session) {
   })
   
   
-  
   observeEvent(input$selecionar_sd_button,{
     
     shinyjs::disable("selecionar_sd_button")
@@ -659,8 +621,7 @@ function (input, output, session) {
                     row.names = F,
                     sep = ";",
                     dec = ",")
-      }
-    )
+      })
     
     output$downloadAvaliacoes_Gerada_SD = downloadHandler (
       filename = function ( ) {
@@ -680,8 +641,7 @@ function (input, output, session) {
                     dec = ",",
                     row.names = T,
                     col.names = NA)
-      }
-    )
+      })
     
     output$downloadTabelaMensal_Gerada_SD = downloadHandler (
       filename = function ( ) {
@@ -694,8 +654,7 @@ function (input, output, session) {
         write.table (tabela, file, col.names = NA, row.names = T,
                      sep = ";",
                      dec = ",")
-      }
-    )
+      })
     
     output$downloadTabelaAnual_Gerada_SD = downloadHandler (
       filename = function ( ) {
@@ -708,10 +667,7 @@ function (input, output, session) {
         write.table (tabela, file, col.names = NA, row.names = T,
                      sep = ";",
                      dec = ",")
-      }
-    )
-    
-        
+      })
   })
   
   #DELETAR SERIES DO BANCO DE DADOS
@@ -902,19 +858,6 @@ function (input, output, session) {
   SeriesDesagregacao = SeriesSinteticas()
   output$SeriesDesagregacao <- DT::renderDataTable(SeriesDesagregacao,server = TRUE, selection = 'single')
   
-  #Linha Selecionada da tabela SeriesDesagregacao para desagregar
-  
-  idSerie_SinteticaDNP = reactive({
-    input$SeriesDesagregacao_button
-    if(input$analise_DNP == 1){ 
-      selectedrowindex <<- input$SeriesDesagregacao_rows_selected[length(input$SeriesDesagregacao_rows_selected)]
-      selectedrowindex <<- as.numeric(selectedrowindex)
-      idSerie_Sintetica <- (SeriesDesagregacao[selectedrowindex,ID]) 
-      print(idSerie_Sintetica)
-    }
-    
-  })
-  
   serieHistDNP <- reactive({
     input$SeriesDesagregacao_button
     if(input$analise_DNP == 1){ 
@@ -1046,9 +989,7 @@ function (input, output, session) {
       output$SeriesSinteticas<- DT::renderDataTable(SSTable,server = TRUE, selection = 'single')
       
     })
-    
- 
-    
+  
   })
   
   observeEvent(input$limparButton_DNP,{
