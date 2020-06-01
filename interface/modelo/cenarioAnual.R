@@ -1,7 +1,5 @@
 cenarioSinteticoAnual = function (serieH, lags, n) {
-  # leitura = read.table (dados, header = TRUE, sep = ";", dec = ",")
-  # leitura = leitura[, -1]
-  # serieH = matrix (leitura, ncol = 12, byrow = TRUE)
+  
   serieAnualH = apply (serieH, 1, sum)
   serieHL = log (serieAnualH)
   mediaHL = mean (serieHL)
@@ -11,7 +9,6 @@ cenarioSinteticoAnual = function (serieH, lags, n) {
   modelo = ARMA (serieHN, lags)
   parametros = modelo$parametros
   residuos = modelo$residuos
-  print('teste 1')
   dpRes =  modelo$dpRes
   c = modelo$constante
   
