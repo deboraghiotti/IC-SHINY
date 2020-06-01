@@ -8,16 +8,16 @@ source('desagregacao.R')
 source('modelo/cenarioAnual.R')
 source('modules.R')
 
-library('data.table')
-library(e1071)
-library(shinyalert)
-library(plotly)
-
 source('tabs/tab-desagregacao.R')
 source('tabs/tab-series-geradas.R')
 source('tabs/tab-ARMA.R')
 source('tabs/tab-PMIX.R')
 source('tabs/tab-estacoes.R')
+
+library('data.table')
+library(e1071)
+library(shinyalert)
+library(plotly)
 
 
 function (input, output, session) {

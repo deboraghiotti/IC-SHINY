@@ -1,7 +1,4 @@
-#Funcoes auxiliares
-
-camposConsultaEstacao <- c("codigo","nome")
-camposConsultaSS <- c("nomeResultados","codigoResultados")
+# Funcoes auxiliares
 
 labelMandatory <- function(label) {
   tagList(
