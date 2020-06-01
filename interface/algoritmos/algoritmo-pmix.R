@@ -1,26 +1,8 @@
 library (shiny)
 library (DT)
 
-source ('analise/graficoFAC_Anual.R')
-source ('analise/graficoFAC_Mensal.R')
-source ('analise/graficoSerieHistorica.R')
-source ('analise/graficoSeries.R')
-
-source ('modelo/cenarioAnual.R')
-source ('modelo/cenarioSintetico.R')
-source ('modelo/correlograma.R')
-source ('modelo/entrada.R')
-source ('modelo/medidasEstatisticas.R')
-source ('modelo/powell.R')
-
-source ('modelo/sumQuadRes.R')
-source ('modelo/volumeUtil.R')
-
-source ('otimizacao/avaliacao.R')
-source ('otimizacao/inicializaPop.R')
-source ('otimizacao/mecanismos.R')
-source ('otimizacao/tempo.R')
-
+# Utiliza funcoes que estao nas pastas "analise","modelo" e "otimizacao"
+# Algoritmo do modelo pmix
 algoritmo = function (input,serieH) {
   lags = c (input$p, input$q, input$P, input$Q)
 
