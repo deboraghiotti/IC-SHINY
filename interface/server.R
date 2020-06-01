@@ -24,13 +24,13 @@ function (input, output, session) {
   
   ############################## MODELO PMIX ##############################
   
-  ############### INPUT DO ALGORITMO ##########
+  ########## INPUT DO MODELO PMIX 
   
   estacao = loadData("ESTACAO")
   updateSelectInput(session, "estacoes",
                     choices = estacao$nome,
                     selected = NULL)
- 
+
   serieHist = reactive({
       output$estacaoSelecionada <- renderText(input$estacoes)
       serieH <- valorSH('',input$estacoes)
@@ -39,21 +39,7 @@ function (input, output, session) {
   serieHistAnual = reactive ({
     apply (serieHist ( ), 1, sum)
   })
-  
-  leituraSerie = reactive ({
-    arqSeries = lapply (input$serieArquivada$datapath, function (x)
-      read.csv2 (x, header = input$headerA,
-                 sep = input$sepA,
-                 dec = input$decA))
-    arqSeries = lapply (arqSeries, function (x) {
-      if (ncol (x) > 12) return (x[ ,-1])
-      else return (x)
-    })
-    serieS = lapply (arqSeries, function (x)
-      as.matrix (x))
-    return (serieS)
-  })
-  
+ 
   ########## Funcao Algoritmo roda o modelo PMIX.
   
   funcaoAlgoritmo = reactive({
@@ -82,15 +68,14 @@ function (input, output, session) {
     apply (serieEscolhida ( ), 1, sum)
   })
   
-  # Avalicao da serie sintetica gerada pelo pmix
+  ########## Avalicao da serie sintetica gerada pelo pmix
+  
   volumePMIX <- callModule(volume,"PMIX",TRUE,serieHist,serieEscolhida)
   avaliacaoMensalPMIX <- callModule(avaliacaoMensal,"PMIX",serieHist,serieEscolhida)
   acfAnualPMIX <- callModule(facAnual,"PMIX",serieHistAnual,serieEscolhidaAnual)
   acfMensalPMIX <- callModule(facMensal,"PMIX",serieHist,serieEscolhida)
   hurstMensalPMIX <- callModule(coeficienteHurst,"PMIX-Mensal","Mensal",serieHist,serieEscolhida)
   hurstAnualPMIX <- callModule(coeficienteHurst,"PMIX-Anual","Anual",serieHistAnual,serieEscolhidaAnual)
-  
-  ############### ALGORITMO DO MODELO ###############
     
   observeEvent(input$iniciar,{
     
@@ -99,7 +84,6 @@ function (input, output, session) {
     shinyjs::disable("iniciar")
     
     ########## Resultados da serie gerada pelo Modelo PMIX
-    
     
     output$resultadoGeral = renderPrint ({
       if (input$iniciar == 0)
@@ -172,6 +156,7 @@ function (input, output, session) {
       }
     })
     
+    ########## Grafico que compara as 50 series geradas pelo Algoritmo Genetico
     
     output$grafico_avaliacoes = renderPlotly({
       dados = data.frame (funcaoAlgoritmo ( )$arqAvaliacoes)
@@ -197,8 +182,7 @@ function (input, output, session) {
       shinyjs::show("resultados_PMIX")
     })
     
-    ########## Armazenamento dos resultados do modelo PMIX
-    
+    # Download da serie gerada pelo MODELO PMIX
     output$downloadSerie = downloadHandler (
       filename = function ( ) {
         paste("serie_", input$nSerie, ".csv",sep="")
@@ -214,7 +198,7 @@ function (input, output, session) {
     
   })
   
-  
+  ########## Armazenamento da serie gerada pelo MODELO PMIX no Banco de Dados
   observeEvent(input$armazenarBD,{
  
     shinyjs::disable("armazenarBD")
@@ -247,12 +231,11 @@ function (input, output, session) {
         
         #Tabela soma_residual
         somReSint = NULL
-        if(input$tipo == 1)
+        if(input$tipo == 1){ 
           somReSint = funcaoAlgoritmo ( )$algoritmo$somRes
-        else
+        }else{
           somReSint = funcaoAlgoritmo ( )$arqAvaliacoes$SomRes[1]
-        
-        #FAZER AS FUNcoe PARA ARMAZENAR OS VALORES!!!!!!!!!!!!!!!!
+        }
         
         idEstacao <- findID(estacao,input$estacoes)
         idSERIE_SINTETICA <- registrarSSPMIX(input,idEstacao)
@@ -289,8 +272,6 @@ function (input, output, session) {
     
   })
   
-
-
   observeEvent(input$tipo,{
     if(input$tipo == 2){
         shinyjs::show("parametros_ag")
@@ -325,12 +306,14 @@ function (input, output, session) {
   
   
   ############################### TABPANEL: DADOS HISTORICOS ##############################
-  #################### CADASTRO DE UMA ESTACAO ######################
+  ############### CADASTRO DE UMA ESTACAO 
+  
   observe({
     # Campos obrigatorios para cadastrar uma estacao: nome, codigo e o arquivo com a serie historica
     camposObrigatorios <- c("nomeEstacao", "codigoEstacao","fileSH")
     mandatoryFilled <- vapply(camposObrigatorios,function(x) {!is.null(input[[x]]) && input[[x]] != ""},logical(1))
     mandatoryFilled <- all(mandatoryFilled)
+    
     # Se todos os campos forem completados, o botao de cadastrar é habiltado
      shinyjs::toggleState(id = "cadastrar", condition = mandatoryFilled)
   })
@@ -378,7 +361,7 @@ function (input, output, session) {
     shinyjs::hide("cadastro_realizado")
   })  
   
-  ################################## CONSULTAR ESTACAO ###################################
+  ############## CONSULTAR ESTACAO 
   updateSelectInput(session, "consultaEstacoes",
                     choices = estacao$nome,
                     selected = NULL)
@@ -389,6 +372,7 @@ function (input, output, session) {
       output$estacaoSelecionada <- renderText(input$consultaEstacoes)
       serieH <- valorSH('',input$consultaEstacoes)
     })
+    
     serieHistAnualConsulta = reactive ({
       apply (serieHistConsulta ( ), 1, sum)
     })
@@ -396,14 +380,15 @@ function (input, output, session) {
     shinyjs::disable("ConsultarButton")
     shinyjs::disable("consultaEstacoes")
     shinyjs::show("estacao_resultados")
+    
     output$dados = renderPlot({
       req(serieHistConsulta)
       plotSerie(serieHistConsulta())
     })
     
     infoEstacao <- infoEstacao(input$consultaEstacoes)
+    
     output$dadosEstacaoTable = DT::renderDataTable(datatable(infoEstacao(input$consultaEstacoes), options = list(dom = 't')))
-    print(infoEstacao)
     output$volumeUtilHist = renderPrint ({
       print ("Volume util")
       print (paste (volumeUtil (serieHistConsulta ( ), (input$porcentagemRegularizacaoHist/100), TRUE), "m^3"))
@@ -583,9 +568,6 @@ function (input, output, session) {
     selectedrowindex <<- as.numeric(selectedrowindex)
     idSerieDesagregada <- (SDTable[selectedrowindex,ID])
     
-    print(selectedrowindex)
-    print(idSerieDesagregada)
-    
     serieDesagregada = selectSerie_Desagregada(idSerieDesagregada)
   
     shinyjs::show("sd_resultados")
@@ -735,10 +717,12 @@ function (input, output, session) {
     shinyjs::hide("soma_sd_panel")
   })
   
-  ############################################# TABPANEL: MODELO ARMA #######################################################
+  ############################## TABPANEL: MODELO ARMA ##############################
   updateSelectInput(session, "estacoes_ARMA",
                     choices = estacao$nome,
                     selected = NULL)
+  
+  ########## INPUT DO MODELO PMIX
   
   serieHist_ARMA = reactive({
     serieHist_ARMA = valorSH('',input$estacoes_ARMA)
@@ -748,6 +732,7 @@ function (input, output, session) {
     apply (serieHist_ARMA(), 1, sum)  
   })
   
+  ########## Funcao algoritmo do MODELO ARMA
   resultados_ARMA = reactive({
 
     progress <- shiny::Progress$new()
@@ -758,10 +743,10 @@ function (input, output, session) {
       isolate (cenarioSinteticoAnual(serieHist_ARMA(),c(input$p_ARMA,input$q_ARMA),input$nsint_ARMA))
   })
   
+  ########## Serie gerada pelo MODELO ARMA
   serieSint_ARMA = reactive(resultados_ARMA()$serieSintetica)
   
   # Avaliacao da serie sintetica gerada pelo modelo ARMA
-  
   avaliacaoAnualARMA <- callModule(avaliacaoAnual,"ARMA",serieHistAnual_ARMA,serieSint_ARMA)
   acfAnualARMA <- callModule(facAnual,"ARMA",serieHistAnual_ARMA,serieSint_ARMA)
   hurstAnualARMA <- callModule(coeficienteHurst,"ARMA","Anual",serieHistAnual_ARMA,serieSint_ARMA)
@@ -853,11 +838,12 @@ function (input, output, session) {
   })
   
   
-  ##############################################################################################################
-  ############################################ TAB : DESAGREGACAO ##############################################
+  
+  ############################## TAB : DESAGREGACAO ##############################
   SeriesDesagregacao = SeriesSinteticas()
   output$SeriesDesagregacao <- DT::renderDataTable(SeriesDesagregacao,server = TRUE, selection = 'single')
   
+  ########## INPUT DESAGREGACAO
   serieHistDNP <- reactive({
     input$SeriesDesagregacao_button
     if(input$analise_DNP == 1){ 
@@ -869,6 +855,7 @@ function (input, output, session) {
       
       serieH = buscarSH(codigo,estacao)
       serieHist = div_mensais(serieH)
+      
     }else if(input$analise_DNP == 2){
       serieH = data.frame(read.csv2(input$serieHArquivada$datapath))
       colnames(serieH)=c("periodo","valor")
@@ -895,7 +882,7 @@ function (input, output, session) {
     
   })
   
-  
+  ########## Algoritmo da DESAGREGACAO
   desagregadoNP = reactive({
     input$SeriesDesagregacao_button
     if(input$analise_DNP == 1){ 
@@ -908,7 +895,6 @@ function (input, output, session) {
       colunas = c("x","JAN","FEV","MAR","ABR","MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ")
       desagregado <- read.csv2(input$serieDNPArquivada$datapath,sep=";",dec=",",col.names = colunas,header=TRUE)
       desagregado = desagregado[,-c(1)]
-      #as.matrix(desagregado)
     }
   })
   
@@ -947,11 +933,9 @@ function (input, output, session) {
     
   })
   
-  
+  ########## Armazenando a serie desagregada no banco de dados
   observeEvent(input$armazenarBD_DNP,{
-    #Data no formato para o armazenamento no mysql
-    #format(Sys.time(),"%Y-%m-%d %H:%M:%S")
-    
+   
     shinyjs::disable("armazenarBD_DNP")
     shinyjs::show("armazenando_msg_DNP")
     shinyjs::hide("error_armazenar_DNP")
