@@ -107,6 +107,7 @@ TabPMIX = tabPanel ("Modelo PMIX",
                       )
                     ),
                     hr(),
+                    p("AJUSTE E VERIFIQUE O VALOR DO VOLUME ANTES DE ARMAZENAR A SERIE."),
                     fluidRow( 
                       column(width = 2,actionButton("armazenarBD","Armazenar",class = "btn-primary")),
                       column(width = 2,downloadButton ("downloadSerie", "Download Serie", icon ("save")))
