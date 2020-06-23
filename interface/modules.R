@@ -9,6 +9,8 @@
 # Server: retorna um data.frame com a avaliacao da serie sintetica (media, desvio padrao,kurt, assimetria e 
 # coeficiente de variacao).
 
+library(DT)
+
 avaliacaoMensalOutput <- function(id){
   
   # Criado um namespace com o id

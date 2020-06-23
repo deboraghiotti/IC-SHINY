@@ -1,6 +1,6 @@
-############################### SERVER TABPANEL DADOS HISTORICOS ##############################
-############### CADASTRO DE UMA ESTACAO 
+## SERVER: TABPANEL DADOS HISTORICOS 
 
+# Cadastro de uma estacao 
 observe({
   # Campos obrigatorios para cadastrar uma estacao: nome, codigo e o arquivo com a serie historica
   camposObrigatorios <- c("nomeEstacao", "codigoEstacao","fileSH")
@@ -14,7 +14,6 @@ observe({
 observeEvent(input$cadastrar,{
   
   #Inserindo a estacao no banco de dados
-  
   shinyjs::disable("cadastrar")
   shinyjs::show("cadastrando_msg")
   shinyjs::hide("error")
@@ -54,7 +53,7 @@ observeEvent(input$cadastrar_outra, {
   shinyjs::hide("cadastro_realizado")
 })  
 
-############## CONSULTAR ESTACAO 
+# Consultar uma estacao 
 updateSelectInput(session, "consultaEstacoes",
                   choices = estacao$nome,
                   selected = NULL)
@@ -117,7 +116,7 @@ observeEvent(input$ConsultarButton,{
     datatable (medidas)
   })
   
-  #DELETAR SERIES DO BANCO DE DADOS
+  # Deletar a estacao e as series da estacao
   observeEvent(input$DeletarButton,{ 
     deleteEstacao(input$consultaEstacoes)
     shinyalert("Deletado!","A Estacao foi deletada com sucesso", type = "success")

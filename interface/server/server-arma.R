@@ -1,10 +1,9 @@
-############################## TABPANEL: MODELO ARMA ##############################
+## SERVER: TABPANEL MODELO ARMA
 updateSelectInput(session, "estacoes_ARMA",
                   choices = estacao$nome,
                   selected = NULL)
 
-########## INPUT DO MODELO PMIX
-
+# Input do modelo ARMA
 serieHist_ARMA = reactive({
   serieHist_ARMA = valorSH('',input$estacoes_ARMA)
 })
@@ -13,7 +12,7 @@ serieHistAnual_ARMA = reactive({
   apply (serieHist_ARMA(), 1, sum)  
 })
 
-########## Funcao algoritmo do MODELO ARMA
+# Funcao algoritmo do modelo ARMA
 resultados_ARMA = reactive({
   
   progress <- shiny::Progress$new()
@@ -24,7 +23,7 @@ resultados_ARMA = reactive({
     isolate (cenarioSinteticoAnual(serieHist_ARMA(),c(input$p_ARMA,input$q_ARMA),input$nsint_ARMA))
 })
 
-########## Serie gerada pelo MODELO ARMA
+# Serie gerada pelo MODELO ARMA
 serieSint_ARMA = reactive(resultados_ARMA()$serieSintetica)
 
 # Avaliacao da serie sintetica gerada pelo modelo ARMA

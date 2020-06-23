@@ -1,4 +1,4 @@
-################################# TABPANEL SERIES GERADAS #################################
+## SERVER: TABPANEL SERIES GERADAS 
 
 SSTable <- SeriesSinteticas()
 SDTable <- SeriesDesagregadas()

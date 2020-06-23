@@ -1,8 +1,5 @@
-
-############################# SERVER: MODELO PMIX ##############################
-
-########## INPUT DO MODELO PMIX 
-
+## SERVER: TABPANEL MODELO PMIX
+# INPUT DO MODELO PMIX 
 estacao = loadData("ESTACAO")
 updateSelectInput(session, "estacoes",
                   choices = estacao$nome,
@@ -17,7 +14,7 @@ serieHistAnual = reactive ({
   apply (serieHist ( ), 1, sum)
 })
 
-########## Funcao Algoritmo roda o modelo PMIX.
+# Funcao Algoritmo roda o modelo PMIX.
 
 funcaoAlgoritmo = reactive({
   
@@ -272,8 +269,7 @@ observe ({
     updateSelectInput(session, "nSerie",
                       choices = 1,
                       selected = 1)
-  }
-  else {
+  }else {
     updateSelectInput (session, "nSerie",
                        choices = 1:input$nPop,
                        selected = input$nPop)

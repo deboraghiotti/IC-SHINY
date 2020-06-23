@@ -1,8 +1,9 @@
-############################## TAB : DESAGREGACAO ##############################
+## SERVER: TABPANEL DESAGREGACAO
+
 SeriesDesagregacao = SeriesSinteticas()
 output$SeriesDesagregacao <- DT::renderDataTable(SeriesDesagregacao,server = TRUE, selection = 'single')
 
-########## INPUT DESAGREGACAO
+# Input da desagregacao
 serieHistDNP <- reactive({
   input$SeriesDesagregacao_button
   if(input$analise_DNP == 1){ 
@@ -41,15 +42,22 @@ serieSintDNP <- reactive({
   
 })
 
-########## Algoritmo da DESAGREGACAO
+# Algoritmo da desagregacao
 desagregadoNP = reactive({
   input$SeriesDesagregacao_button
   if(input$analise_DNP == 1){ 
-    progress <- shiny::Progress$new()
-    on.exit(progress$close())
-    progress$set(message = "Calculando a desagregacao nao-parametrica", value = 0)
     
-    desagregado <- desagrega_np(serieSintDNP(),serieHistDNP())
+    if(input$tipoDesagregacao == 1){
+      progress <- shiny::Progress$new()
+      on.exit(progress$close())
+      progress$set(message = "Calculando a desagregacao parametrica", value = 0)
+      desagregado <- desagregacao_parametrica(serieSintDNP(),serieHistDNP())
+    }else if(input$tipoDesagregacao == 2){
+      progress <- shiny::Progress$new()
+      on.exit(progress$close())
+      progress$set(message = "Calculando a desagregacao nao-parametrica", value = 0)
+      desagregado <- desagrega_np(serieSintDNP(),serieHistDNP())
+    }
   }else if(input$analise_DNP == 2){
     colunas = c("x","JAN","FEV","MAR","ABR","MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ")
     desagregado <- read.csv2(input$serieDNPArquivada$datapath,sep=";",dec=",",col.names = colunas,header=TRUE)
@@ -92,7 +100,7 @@ observeEvent(input$SeriesDesagregacao_button,{
   
 })
 
-########## Armazenando a serie desagregada no banco de dados
+# Armazenando a serie desagregada no banco de dados
 observeEvent(input$armazenarBD_DNP,{
   
   shinyjs::disable("armazenarBD_DNP")
@@ -112,8 +120,11 @@ observeEvent(input$armazenarBD_DNP,{
     selectedrowindex <<- input$SeriesDesagregacao_rows_selected[length(input$SeriesDesagregacao_rows_selected)]
     selectedrowindex <- as.numeric(selectedrowindex)
     idSerie_Sintetica <- (SeriesDesagregacao[selectedrowindex,ID])
-    
-    idDesagregado = registrarSSDESAGREGACAO(idSerie_Sintetica,"N")
+    tipo_desagregacao = "N"
+    if(input$tipoDesagregacao == 1){
+      tipo_desagregacao = "S"
+    }
+    idDesagregado = registrarSSDESAGREGACAO(idSerie_Sintetica,tipo_desagregacao)
     inserirSS_Desagregado(idDesagregado,desagregadoNP())
     inserirAvaliacaoDESAGREGACAO(idDesagregado,MediaArmazenar,DesvioArmazenar,AssimetriaArmazenar,KurtArmazenar,CoefVarArmazenar)
     inserirACF_MensalDESAGREGACAO(idDesagregado,acfMensal)
