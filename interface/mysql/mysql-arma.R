@@ -14,10 +14,9 @@ registrarSSARMA <- function(p,q,nsint,idEstacao){
   modelo <- "ARMA"
   anos <- nsint
   lags <- (paste("(",p,",",q,")",sep=""))
-  desagregado <- "N"
   metodo <- "Metodo dos Momentos"
   
-  query <- paste("INSERT INTO SERIE_SINTETICA VALUES(NULL,'",modelo,"',",anos,",'",lags,"','",metodo,"','",desagregado,"',",idEstacao,",CURRENT_TIMESTAMP())",sep="")
+  query <- paste("INSERT INTO SERIE_SINTETICA VALUES(NULL,'",modelo,"',",anos,",'",lags,"','",metodo,"',",idEstacao,",CURRENT_TIMESTAMP())",sep="")
   data <- dbGetQuery(db, query)
   
   query <- "SELECT LAST_INSERT_ID();"

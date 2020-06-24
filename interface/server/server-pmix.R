@@ -230,6 +230,7 @@ observeEvent(input$armazenarBD,{
     shinyjs::hide("armazenando_msg")
     SSTable <- SeriesSinteticas()
     output$SeriesSinteticas<- DT::renderDataTable(SSTable,server = TRUE, selection = 'single')
+    output$SeriesDesagregacao <- DT::renderDataTable(SSTable,server = TRUE, selection = 'single')
     
   })
 })

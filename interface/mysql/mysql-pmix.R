@@ -12,7 +12,6 @@ registrarSSPMIX <- function(input,idEstacao){
   modelo <- "PMIX"
   anos <- (input$nsint)
   lags <- (paste("(",input$p,",",input$q,",",input$P,",",input$Q,")",sep=""))
-  desagregado <- "N"
   
   if(input$tipo == 1){
     metodo <- "Powell"
@@ -20,7 +19,7 @@ registrarSSPMIX <- function(input,idEstacao){
     metodo <- "Algoritmo Genetico"
   }
   
-  query <- paste("INSERT INTO SERIE_SINTETICA VALUES(NULL,'",modelo,"',",anos,",'",lags,"','",metodo,"','",desagregado,"',",idEstacao,",CURRENT_TIMESTAMP())",sep="")
+  query <- paste("INSERT INTO SERIE_SINTETICA VALUES(NULL,'",modelo,"',",anos,",'",lags,"','",metodo,"',",idEstacao,",CURRENT_TIMESTAMP())",sep="")
   data <- dbGetQuery(db, query)
   
   query <- "SELECT LAST_INSERT_ID();"

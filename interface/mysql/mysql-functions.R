@@ -410,10 +410,10 @@ buscarSH <- function(codigoEstacao, nomeEstacao){
   # Return: os dados da table serie_sintetica na forma de data table.
   
   SeriesSinteticas <- function(){
-    query <- paste("SELECT idSERIE_SINTETICA as 'ID',codigo as 'Codigo',nome as 'Estacao',modelo,lags,desagregado,metodo,SERIE_SINTETICA.anos as 'Anos',register_date as 'Data' FROM SERIE_SINTETICA, ESTACAO
-WHERE ID_ESTACAO = IDESTACAO;")
+    query <- paste("SELECT idSERIE_SINTETICA,codigo,nome,modelo,lags,metodo,SERIE_SINTETICA.anos,register_date FROM SERIE_SINTETICA, ESTACAO WHERE ID_ESTACAO = IDESTACAO;")
     dadosList<-alterDataBase(query)
     dadosDT <- setDT(dadosList)
+    colnames(dadosDT) = c("ID","Codigo","Estacao","Modelo","Lags","Metodo","Anos","Data")
     return(dadosDT)
   }
   
@@ -421,9 +421,10 @@ WHERE ID_ESTACAO = IDESTACAO;")
   # Return: os dados da table desagregado na forma de data table
   
   SeriesDesagregadas <- function(){
-    query <- paste("SELECT idDESAGREGADO as 'ID',id_SERIE_SINTETICA as 'ID Serie Sintetica',parametrico,register_date as 'Data' FROM DESAGREGADO;")
+    query <- paste("SELECT idDESAGREGADO,id_SERIE_SINTETICA,parametrico,register_date FROM DESAGREGADO;")
     dadosList<-alterDataBase(query)
     dadosDT <- setDT(dadosList)
+    colnames(dadosDT) = c("ID","ID Serie Sintetica","Parametrica","Data")
     return(dadosDT)
   }
   

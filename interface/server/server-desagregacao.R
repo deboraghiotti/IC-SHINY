@@ -139,8 +139,8 @@ observeEvent(input$armazenarBD_DNP,{
   finally = {
     shinyalert("Armazenado!","A serie foi armazenada com sucesso", type = "success")
     shinyjs::hide("armazenando_msg_DNP")
-    SSTable <- SeriesSinteticas()
-    output$SeriesSinteticas<- DT::renderDataTable(SSTable,server = TRUE, selection = 'single')
+    SDTable <- SeriesDesagregadas()
+    output$SeriesDesagregadas <- DT::renderDataTable(SDTable,server = TRUE, selection = 'single')
     
   })
   

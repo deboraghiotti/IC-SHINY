@@ -2,7 +2,7 @@
 source('modules.R')
 
 TabDesagregacao = tabPanel("Desagregacao",
-                           titlePanel(h2("Desagregacao Nao-Parametrica",align="center")),
+                           titlePanel(h2("Desagregacao Temporal",align="center")),
                            hr(),
                            selectInput ("analise_DNP", label = "Local de analise", 
                                         choices = list ("Estimar" = 1, "Arquivados" = 2),
