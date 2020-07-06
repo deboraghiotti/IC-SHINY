@@ -69,9 +69,11 @@ observeEvent(input$ConsultarButton,{
     apply (serieHistConsulta ( ), 1, sum)
   })
   
+  
   shinyjs::disable("ConsultarButton")
   shinyjs::disable("consultaEstacoes")
   shinyjs::show("estacao_resultados")
+  shinyjs::enable("DeletarButton")
   
   output$dados = renderPlot({
     req(serieHistConsulta)
@@ -116,21 +118,21 @@ observeEvent(input$ConsultarButton,{
     datatable (medidas)
   })
   
-  # Deletar a estacao e as series da estacao
-  observeEvent(input$DeletarButton,{ 
-    deleteEstacao(input$consultaEstacoes)
-    shinyalert("Deletado!","A Estacao foi deletada com sucesso", type = "success")
-    estacao = loadData("ESTACAO")
-    updateSelectInput(session, "consultaEstacoes",
-                      choices = estacao$nome,
-                      selected = NULL)
-    
-    shinyjs::hide("estacao_resultados")
-    shinyjs::enable("ConsultarButton")
-    shinyjs::enable("consultaEstacoes")
-    
-    
-  })
+})
+
+# Deletar a estacao e as series da estacao
+observeEvent(input$DeletarButton,{ 
+  deleteEstacao(input$consultaEstacoes)
+  shinyalert("Deletado!","A Estacao foi deletada com sucesso", type = "success")
+  estacao = loadData("ESTACAO")
+  updateSelectInput(session, "consultaEstacoes",
+                    choices = estacao$nome,
+                    selected = NULL)
+  
+  shinyjs::hide("estacao_resultados")
+  shinyjs::enable("ConsultarButton")
+  shinyjs::enable("consultaEstacoes")
+  shinyjs::disable("DeletarButton")
   
 })
 
@@ -138,4 +140,5 @@ observeEvent(input$LimparButton,{
   shinyjs::enable("ConsultarButton")
   shinyjs::hide("estacao_resultados")
   shinyjs::enable("consultaEstacoes")
+  shinyjs::disable("DeletarButton")
 })

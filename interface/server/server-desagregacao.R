@@ -35,7 +35,7 @@ serieSintDNP <- reactive({
     selectedrowindex <<- as.numeric(selectedrowindex)
     
     idSerie_Sintetica <- (SeriesDesagregacao[selectedrowindex,ID])
-    modelo = (SeriesDesagregacao[selectedrowindex,modelo])
+    modelo = (SeriesDesagregacao[selectedrowindex,Modelo])
     serieSS = SeriesSinteica_Anuais(idSerie_Sintetica,modelo)
     
   }

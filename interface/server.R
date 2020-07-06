@@ -3,6 +3,7 @@ library(e1071)
 library(shinyalert)
 library(plotly)
 library(RMySQL)
+library(shinyjs)
 
 # Shiny Server
 # Fonte: https://shiny.rstudio.com/articles/scoping.html
@@ -14,6 +15,10 @@ library(RMySQL)
 ## Arquivo 'server-series-geradas.R': Possui o server relacionado a tabpanel 'Series Geradas'. UI realionada a esse server: 'tab-series-geradas.R'
 ## Arquivo 'server-arma.R': Possui o server relacionado a tabpanel 'ARMA'. UI realionada a esse server: 'tab-ARMA.R'
 ## Arquivo 'serve-desagregacao.R': Possui o server relacionado a tabpanel 'Desagregacao'. UI realionada a esse server: 'tab-desagregacao.R'
+
+pastas <- c("mysql","analise","modelo","otimizacao","algoritmos")
+file.sources = list.files(pastas,pattern="*.R$", full.names=TRUE, ignore.case=TRUE)
+sapply(file.sources,source,.GlobalEnv)
 
 server <- function (input, output, session) {
   
