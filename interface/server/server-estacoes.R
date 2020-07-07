@@ -114,7 +114,7 @@ observeEvent(input$ConsultarButton,{
     CoefVarHist = DesvioHist/MediaHist
     medidas = data.frame (MediaHist, DesvioHist, KurtHist,AssimetriaHist,CoefVarHist)
     rownames (medidas) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
-    colnames (medidas) = c ("Media Historica", "Desvio-padrao Historico", "Indice Kurt","Assimetria","Coeficiente de Variacao")
+    colnames (medidas) = c ("Media", "Desvio-padrao", "Curtose","Assimetria","Coeficiente de Variacao")
     datatable (medidas)
   })
   

@@ -191,18 +191,18 @@ inserirSomHurstVol <- function(id_SERIE_SINTETICA,somRes,hurstAnual,hurstMensal,
   
   db <- conectarDataBase()
   
-  inicio <- Sys.time()
-  
   query <- paste("INSERT INTO SOMA_RESIDUAL VALUES(NULL,",somRes,",NULL,",id_SERIE_SINTETICA,",NULL)")
   dbGetQuery(db,query)
   
   query <- paste("INSERT INTO HURST VALUES(NULL,",hurstAnual,",",hurstMensal,",NULL,",id_SERIE_SINTETICA,",NULL)")
   dbGetQuery(db,query)
   
-  query <- paste("INSERT INTO VOLUME VALUES(NULL,",volume,",NULL,",id_SERIE_SINTETICA,",NULL)")
-  dbGetQuery(db,query)
+  if(!is.infinite(volume)){
+    query <- paste("INSERT INTO VOLUME VALUES(NULL,",volume,",NULL,",id_SERIE_SINTETICA,",NULL)")
+    dbGetQuery(db,query)
+  }
   
-  fim <- Sys.time()
   dbDisconnect(db)
   
 }
+
