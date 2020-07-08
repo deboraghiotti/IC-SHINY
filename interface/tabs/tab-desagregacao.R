@@ -4,7 +4,7 @@ source('modules.R')
 TabDesagregacao = tabPanel("Desagregacao",
                            titlePanel(h2("Desagregacao Temporal",align="center")),
                            hr(),
-                           selectInput ("analise_DNP", label = "Local de analise", 
+                           selectInput ("analiseDesagregacao", label = "Local de analise", 
                                         choices = list ("Estimar" = 1, "Arquivados" = 2),
                                         selected = "Estimados"),
                            hr(),
@@ -14,10 +14,10 @@ TabDesagregacao = tabPanel("Desagregacao",
                                          selected = 1,inline=TRUE),
                            hr(),
                            h4("Escolha a serie:"),
-                           conditionalPanel (condition ="input.analise_DNP == 1",
+                           conditionalPanel (condition ="input.analiseDesagregacao == 1",
                             DT::dataTableOutput("SeriesDesagregacao")
                            ),
-                           conditionalPanel (condition ="input.analise_DNP == 2",
+                           conditionalPanel (condition ="input.analiseDesagregacao == 2",
                                              fluidRow( 
                                              column(4,fileInput ("serieHArquivada", "Serie historica: ",
                                                         multiple = TRUE,
@@ -35,50 +35,50 @@ TabDesagregacao = tabPanel("Desagregacao",
                           ),
                            fluidRow( 
                             column(2,actionButton("SeriesDesagregacao_button","Selecionar",class= "btn-primary")),
-                            column(2,actionButton("limparButton_DNP", "Limpar", class = "btn-primary",style="background-color:#ff0000;border-color: #ff0000"))
+                            column(2,actionButton("limparDesagregacaoButton", "Limpar", class = "btn-primary",style="background-color:#ff0000;border-color: #ff0000"))
                            ),
                            br(),br(),
                            shinyjs::hidden(
-                             div(id = "resultados_DNP",
+                             div(id = "resultadosDesagregacao",
                                  tabsetPanel(
                                     tabPanel("Avaliacoes",
                                              br(),
                                              # Module avaliacaoMensal
-                                             avaliacaoMensalOutput("DNP")
+                                             avaliacaoMensalOutput("Desagregacao")
                                              ),
                                     tabPanel("Grafico FAC Anuais",
                                              br ( ),
                                              # Module facAnual
-                                             facAnualOutput("DNP")
+                                             facAnualOutput("Desagregacao")
                                              
                                     ),
                                     tabPanel("Graficos FAC mensais",
                                              br ( ),
                                              #  Module facMensal
-                                             facMensalOutput("DNP")
+                                             facMensalOutput("Desagregacao")
                                     ),
                                     tabPanel("Medidas",
                                              br(),
-                                             volumeOutput("DNP"),
+                                             volumeOutput("Desagregacao"),
                                              hr(),
                                              h4(strong("Coeficiente Hurst")),
                                              fluidRow(
-                                              column(6,coeficienteHurstOutput("DNP-Mensal")),
-                                              column(6,coeficienteHurstOutput("DNP-Anual"))
+                                              column(6,coeficienteHurstOutput("Desagregacao-Mensal")),
+                                              column(6,coeficienteHurstOutput("Desagregacao-Anual"))
                                              )
                                     )
                                  ),
                                  hr(),
-                                 downloadButton ("downloadSerie_DNP", "Download Serie", icon ("save"))
+                                 downloadButton ("downloadSerieDesagregacao", "Download Serie", icon ("save"))
                               )
                            ),
-                          conditionalPanel(condition ="input.analise_DNP == 1",
+                          conditionalPanel(condition ="input.analiseDesagregacao == 1",
                                            br(),
-                                           actionButton("armazenarBD_DNP","Armazenar",class = "btn-primary"),
+                                           actionButton("armazenarBD_Desagregacao","Armazenar",class = "btn-primary"),
                                            shinyjs::hidden(
-                                             span(id = "armazenando_msg_DNP", "Armazenando..."),
-                                             div(id = "error_armazenar_DNP",
-                                                 div(br(), tags$b("Error: "), span(id = "error_msg_armazenar_DNP"))
+                                             span(id = "armazenando_msg_Desagregacao", "Armazenando..."),
+                                             div(id = "error_armazenar_Desagregacao",
+                                                 div(br(), tags$b("Error: "), span(id = "error_msg_armazenar_Desagregacao"))
                                              )
                                            )
                           )

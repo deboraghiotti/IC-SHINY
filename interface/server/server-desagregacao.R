@@ -4,9 +4,9 @@ SeriesDesagregacao = SeriesSinteticas()
 output$SeriesDesagregacao <- DT::renderDataTable(SeriesDesagregacao,server = TRUE, selection = 'single')
 
 # Input da desagregacao
-serieHistDNP <- reactive({
+serieHistDesagregacao <- reactive({
   input$SeriesDesagregacao_button
-  if(input$analise_DNP == 1){ 
+  if(input$analiseDesagregacao == 1){ 
     selectedrowindex <<- input$SeriesDesagregacao_rows_selected[length(input$SeriesDesagregacao_rows_selected)]
     selectedrowindex <<- as.numeric(selectedrowindex)
     
@@ -16,7 +16,7 @@ serieHistDNP <- reactive({
     serieH = buscarSH(codigo,estacao)
     serieHist = div_mensais(serieH)
     
-  }else if(input$analise_DNP == 2){
+  }else if(input$analiseDesagregacao == 2){
     serieH = data.frame(read.csv2(input$serieHArquivada$datapath))
     colnames(serieH)=c("periodo","valor")
     serieH = as.data.table(serieH)
@@ -24,13 +24,13 @@ serieHistDNP <- reactive({
   }
 })
 
-serieHistAnualDNP <- reactive({
-  serieHist_Anual = apply (serieHistDNP(), 1, sum)  
+serieHistAnualDesagregacao <- reactive({
+  serieHist_Anual = apply (serieHistDesagregacao(), 1, sum)  
 })
 
-serieSintDNP <- reactive({
+serieSintDesagregacao <- reactive({
   input$SeriesDesagregacao_button
-  if(input$analise_DNP == 1){ 
+  if(input$analiseDesagregacao == 1){ 
     selectedrowindex <<- input$SeriesDesagregacao_rows_selected[length(input$SeriesDesagregacao_rows_selected)]
     selectedrowindex <<- as.numeric(selectedrowindex)
     
@@ -43,51 +43,52 @@ serieSintDNP <- reactive({
 })
 
 # Algoritmo da desagregacao
-desagregadoNP = reactive({
+serieDesagregada = reactive({
   input$SeriesDesagregacao_button
-  if(input$analise_DNP == 1){ 
+  if(input$analiseDesagregacao == 1){ 
     
     if(input$tipoDesagregacao == 1){
       progress <- shiny::Progress$new()
       on.exit(progress$close())
       progress$set(message = "Calculando a desagregacao parametrica", value = 0)
-      desagregado <- desagregacao_parametrica(serieSintDNP(),serieHistDNP())
+      desagregado <- desagregacao_parametrica(serieSintDesagregacao(),serieHistDesagregacao())
     }else if(input$tipoDesagregacao == 2){
       progress <- shiny::Progress$new()
       on.exit(progress$close())
       progress$set(message = "Calculando a desagregacao nao-parametrica", value = 0)
-      desagregado <- desagrega_np(serieSintDNP(),serieHistDNP())
+      desagregado <- desagrega_np(serieSintDesagregacao(),serieHistDesagregacao())
     }
-  }else if(input$analise_DNP == 2){
+  }else if(input$analiseDesagregacao == 2){
     colunas = c("x","JAN","FEV","MAR","ABR","MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ")
     desagregado <- read.csv2(input$serieDNPArquivada$datapath,sep=";",dec=",",col.names = colunas,header=TRUE)
     desagregado = desagregado[,-c(1)]
   }
 })
 
-desagregadoNP_Anual = reactive({
-  apply (desagregadoNP(), 1, sum)
+serieAnualDesagregada = reactive({
+  apply (serieDesagregada(), 1, sum)
 })
 
 # Avalicao da serie desagregada pela desagregacao nao-parametrica
-avaliacaoMensalDNP <- callModule(avaliacaoMensal,"DNP",serieHistDNP,desagregadoNP)
-acfAnualDNP <- callModule(facAnual,"DNP",serieHistAnualDNP,desagregadoNP_Anual)
-acfMensalDNP <- callModule(facMensal,"DNP",serieHistDNP,desagregadoNP)
-hurstMensalDNP <- callModule(coeficienteHurst,"DNP-Mensal","Mensal",reactive(as.matrix(serieHistDNP())),reactive(as.matrix(desagregadoNP())))
-hurstAnualDNP <- callModule(coeficienteHurst,"DNP-Anual","Anual",serieHistAnualDNP,desagregadoNP_Anual)
-volumeDNP <- callModule(volume,"DNP","TRUE",reactive(as.matrix(serieHistDNP())),reactive(as.matrix(desagregadoNP())))
+avaliacaoMensalDesagregacao <- callModule(avaliacaoMensal,"Desagregacao",serieHistDesagregacao,serieDesagregada)
+acfAnualDesagregacao <- callModule(facAnual,"Desagregacao",serieHistAnualDesagregacao,serieAnualDesagregada)
+acfMensalDesagregacao <- callModule(facMensal,"Desagregacao",serieHistDesagregacao,serieDesagregada)
+hurstMensalDesagregacao <- callModule(coeficienteHurst,"Desagregacao-Mensal","Mensal",
+                                      reactive(as.matrix(serieHistDesagregacao())),reactive(as.matrix(serieDesagregada())))
+hurstAnualDesagregacao <- callModule(coeficienteHurst,"Desagregacao-Anual","Anual",serieHistAnualDesagregacao,serieAnualDesagregada)
+volumeDesagregacao <- callModule(volume,"Desagregacao","TRUE",reactive(as.matrix(serieHistDesagregacao())),reactive(as.matrix(serieDesagregada())))
 
 observeEvent(input$SeriesDesagregacao_button,{
   
-  desagregadoNaoP = desagregadoNP()
+  desagregadoNaoP = serieDesagregada()
   
   shinyjs::disable("SeriesDesagregacao_button")
-  shinyjs::enable("limparButton_DNP")
-  shinyjs::show("resultados_DNP")
+  shinyjs::enable("limparDesagregacaoButton")
+  shinyjs::show("resultadosDesagregacao")
   
-  output$downloadSerie_DNP = downloadHandler (
+  output$downloadSerieDesagregacao = downloadHandler (
     filename = function ( ) {
-      paste("serieDNP.csv",sep="")
+      paste("serieDesagregacao.csv",sep="")
     },
     content = function (file) {
       colunas = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
@@ -101,21 +102,21 @@ observeEvent(input$SeriesDesagregacao_button,{
 })
 
 # Armazenando a serie desagregada no banco de dados
-observeEvent(input$armazenarBD_DNP,{
+observeEvent(input$armazenarBD_Desagregacao,{
   
-  shinyjs::disable("armazenarBD_DNP")
-  shinyjs::show("armazenando_msg_DNP")
-  shinyjs::hide("error_armazenar_DNP")
+  shinyjs::disable("armazenarBD_Desagregacao")
+  shinyjs::show("armazenando_msg_Desagregacao")
+  shinyjs::hide("error_armazenar_Desagregacao")
   
   tryCatch({
     
-    MediaArmazenar = avaliacaoMensalDNP$media()  
-    DesvioArmazenar = avaliacaoMensalDNP$desvioPadrao() 
-    KurtArmazenar = avaliacaoMensalDNP$kurt() 
-    AssimetriaArmazenar = avaliacaoMensalDNP$assimetria() 
-    CoefVarArmazenar = avaliacaoMensalDNP$coefVar()  
-    acfMensal = data.frame (acfMensalDNP()[-1, ])
-    acfAnual = data.frame (as.vector (acfAnualDNP()[-1]))
+    MediaArmazenar = avaliacaoMensalDesagregacao$media()  
+    DesvioArmazenar = avaliacaoMensalDesagregacao$desvioPadrao() 
+    KurtArmazenar = avaliacaoMensalDesagregacao$kurt() 
+    AssimetriaArmazenar = avaliacaoMensalDesagregacao$assimetria() 
+    CoefVarArmazenar = avaliacaoMensalDesagregacao$coefVar()  
+    acfMensal = data.frame (acfMensalDesagregacao()[-1, ])
+    acfAnual = data.frame (as.vector (acfAnualDesagregacao()[-1]))
     
     selectedrowindex <<- input$SeriesDesagregacao_rows_selected[length(input$SeriesDesagregacao_rows_selected)]
     selectedrowindex <- as.numeric(selectedrowindex)
@@ -125,20 +126,20 @@ observeEvent(input$armazenarBD_DNP,{
       tipo_desagregacao = "S"
     }
     idDesagregado = registrarSSDESAGREGACAO(idSerie_Sintetica,tipo_desagregacao)
-    inserirSS_Desagregado(idDesagregado,desagregadoNP())
+    inserirSS_Desagregado(idDesagregado,serieDesagregada())
     inserirAvaliacaoDESAGREGACAO(idDesagregado,MediaArmazenar,DesvioArmazenar,AssimetriaArmazenar,KurtArmazenar,CoefVarArmazenar)
     inserirACF_MensalDESAGREGACAO(idDesagregado,acfMensal)
     inserirACF_ANUALDESAGREGACAO(idDesagregado,acfAnual)
-    inserirHurstVolDESAGREGACAO(idDesagregado,hurstAnualDNP(),hurstMensalDNP(),volumeDNP())
+    inserirHurstVolDESAGREGACAO(idDesagregado,hurstAnualDesagregacao(),hurstMensalDesagregacao(),volumeDesagregacao())
   },
   error = function(err) {
-    shinyjs::hide("armazenando_msg_DNP")
-    shinyjs::html("error_msg_armazenar_DNP", err$message)
-    shinyjs::show(id = "error_armazenar_DNP", anim = TRUE, animType = "fade")
+    shinyjs::hide("armazenando_msg_Desagregacao")
+    shinyjs::html("error_msg_armazenar_Desagregacao", err$message)
+    shinyjs::show(id = "error_armazenar_Desagregacao", anim = TRUE, animType = "fade")
   },
   finally = {
     shinyalert("Armazenado!","A serie foi armazenada com sucesso", type = "success")
-    shinyjs::hide("armazenando_msg_DNP")
+    shinyjs::hide("armazenando_msg_Desagregacao")
     SDTable <- SeriesDesagregadas()
     output$SeriesDesagregadas <- DT::renderDataTable(SDTable,server = TRUE, selection = 'single')
     
@@ -146,10 +147,10 @@ observeEvent(input$armazenarBD_DNP,{
   
 })
 
-observeEvent(input$limparButton_DNP,{
+observeEvent(input$limparDesagregacaoButton,{
   shinyjs::enable("SeriesDesagregacao_button")
-  shinyjs::enable("armazenarBD_DNP")
-  shinyjs::reset("resultados_DNP")
-  shinyjs::hide("resultados_DNP")
-  shinyjs::enable("armazenarBD_DNP")
+  shinyjs::enable("armazenarBD_Desagregacao")
+  shinyjs::reset("resultadosDesagregacao")
+  shinyjs::hide("resultadosDesagregacao")
+  shinyjs::enable("armazenarBD_Desagregacao")
 })
