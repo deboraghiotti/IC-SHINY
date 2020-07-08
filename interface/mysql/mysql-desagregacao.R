@@ -173,16 +173,15 @@ inserirACF_ANUALDESAGREGACAO <- function(id_DESAGREGADO,acf_anual){
 inserirHurstVolDESAGREGACAO<- function(id_Desagregado,hurstAnual,hurstMensal,volume){
   
   db <- conectarDataBase()
-  inicio <- Sys.time()
-  
   
   query <- paste("INSERT INTO HURST VALUES(NULL,",hurstAnual,",",hurstMensal,",NULL,NULL,",id_Desagregado,")")
   dbGetQuery(db,query)
   
-  query <- paste("INSERT INTO VOLUME VALUES(NULL,",volume,",NULL,NULL,",id_Desagregado,")")
-  dbGetQuery(db,query)
+  if(!is.infinite(volume)){
+    query <- paste("INSERT INTO VOLUME VALUES(NULL,",volume,",NULL,NULL,",id_Desagregado,")")
+    dbGetQuery(db,query)
+  }
   
-  fim <- Sys.time()
   dbDisconnect(db)
   
 }
