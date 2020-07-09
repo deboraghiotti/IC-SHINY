@@ -31,6 +31,9 @@ observeEvent(input$cadastrar,{
     updateSelectInput(session, "consultaEstacoes",
                       choices = estacao$nome,
                       selected = NULL)
+    updateSelectInput(session, "estacoes_ARMA",
+                      choices = estacao$nome,
+                      selected = NULL)
     
   },
   error = function(err) {
@@ -126,6 +129,12 @@ observeEvent(input$DeletarButton,{
   shinyalert("Deletado!","A Estacao foi deletada com sucesso", type = "success")
   estacao = loadData("ESTACAO")
   updateSelectInput(session, "consultaEstacoes",
+                    choices = estacao$nome,
+                    selected = NULL)
+  updateSelectInput(session, "estacoes",
+                    choices = estacao$nome,
+                    selected = NULL)
+  updateSelectInput(session, "estacoes_ARMA",
                     choices = estacao$nome,
                     selected = NULL)
   
