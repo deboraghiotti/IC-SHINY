@@ -110,9 +110,9 @@ observeEvent(input$armazenarButton_ARMA,{
   },
   finally = {
     shinyjs::hide("armazenando_msg_ARMA")
-    SSTable <- SeriesSinteticas()
+    SSTable <- SeriesDesagregacao <- SeriesSinteticas()
     output$SeriesSinteticas<- DT::renderDataTable(SSTable,server = TRUE, selection = 'single')
-    output$SeriesDesagregacao <- DT::renderDataTable(SSTable,server = TRUE, selection = 'single')
+    output$SeriesDesagregacao <- DT::renderDataTable(SeriesDesagregacao,server = TRUE, selection = 'single')
     
   })
   

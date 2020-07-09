@@ -1,14 +1,15 @@
 ## SERVER: TABPANEL DESAGREGACAO
 
-SeriesDesagregacao = SeriesSinteticas()
+SeriesDesagregacao <- SeriesSinteticas()
 output$SeriesDesagregacao <- DT::renderDataTable(SeriesDesagregacao,server = TRUE, selection = 'single')
 
 # Input da desagregacao
 serieHistDesagregacao <- reactive({
   input$SeriesDesagregacao_button
   if(input$analiseDesagregacao == 1){ 
-    selectedrowindex <<- input$SeriesDesagregacao_rows_selected[length(input$SeriesDesagregacao_rows_selected)]
-    selectedrowindex <<- as.numeric(selectedrowindex)
+    SeriesDesagregacao <- SeriesSinteticas()
+    selectedrowindex <- input$SeriesDesagregacao_rows_selected[length(input$SeriesDesagregacao_rows_selected)]
+    selectedrowindex <- as.numeric(selectedrowindex)
     
     estacao = (SeriesDesagregacao[selectedrowindex,Estacao])
     codigo = (SeriesDesagregacao[selectedrowindex,Codigo])
@@ -30,9 +31,10 @@ serieHistAnualDesagregacao <- reactive({
 
 serieSintDesagregacao <- reactive({
   input$SeriesDesagregacao_button
-  if(input$analiseDesagregacao == 1){ 
-    selectedrowindex <<- input$SeriesDesagregacao_rows_selected[length(input$SeriesDesagregacao_rows_selected)]
-    selectedrowindex <<- as.numeric(selectedrowindex)
+  if(input$analiseDesagregacao == 1){
+    SeriesDesagregacao <- SeriesSinteticas()
+    selectedrowindex <- input$SeriesDesagregacao_rows_selected[length(input$SeriesDesagregacao_rows_selected)]
+    selectedrowindex <- as.numeric(selectedrowindex)
     
     idSerie_Sintetica <- (SeriesDesagregacao[selectedrowindex,ID])
     modelo = (SeriesDesagregacao[selectedrowindex,Modelo])
