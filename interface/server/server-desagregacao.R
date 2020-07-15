@@ -18,7 +18,7 @@ serieHistDesagregacao <- reactive({
     serieHist = div_mensais(serieH)
     
   }else if(input$analiseDesagregacao == 2){
-    serieH = data.frame(read.csv2(input$serieHArquivada$datapath))
+    serieH = data.frame(read.csv2(input$serieHistDesagregacao$datapath,header = TRUE))
     colnames(serieH)=c("periodo","valor")
     serieH = as.data.table(serieH)
     serieHist = div_mensais(serieH)
@@ -39,7 +39,16 @@ serieSintDesagregacao <- reactive({
     idSerie_Sintetica <- (SeriesDesagregacao[selectedrowindex,ID])
     modelo = (SeriesDesagregacao[selectedrowindex,Modelo])
     serieSS = SeriesSinteica_Anuais(idSerie_Sintetica,modelo)
-    
+    return(serieSS)
+  }else if(input$analiseDesagregacao == 2){
+    serieSS = data.frame(read.csv(input$serieSintDesagregacao$datapath,sep=";",dec=",",header=TRUE))
+    if(input$tipoSerieDesagregacao == 2){
+      serieSS = data.frame(serieSS = apply (serieSS, 1, sum))
+      colnames(serieSS) = "anual"
+      return(serieSS)
+    }
+    colnames(serieSS) = "anual"
+    return(serieSS)
   }
   
 })
@@ -47,8 +56,7 @@ serieSintDesagregacao <- reactive({
 # Algoritmo da desagregacao
 serieDesagregada = reactive({
   input$SeriesDesagregacao_button
-  if(input$analiseDesagregacao == 1){ 
-    
+  
     if(input$tipoDesagregacao == 1){
       progress <- shiny::Progress$new()
       on.exit(progress$close())
@@ -60,11 +68,7 @@ serieDesagregada = reactive({
       progress$set(message = "Calculando a desagregacao nao-parametrica", value = 0)
       desagregado <- desagrega_np(serieSintDesagregacao(),serieHistDesagregacao())
     }
-  }else if(input$analiseDesagregacao == 2){
-    colunas = c("x","JAN","FEV","MAR","ABR","MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ")
-    desagregado <- read.csv2(input$serieDNPArquivada$datapath,sep=";",dec=",",col.names = colunas,header=TRUE)
-    desagregado = desagregado[,-c(1)]
-  }
+
 })
 
 serieAnualDesagregada = reactive({

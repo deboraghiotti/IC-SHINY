@@ -69,12 +69,6 @@ TabPMIX = tabPanel ("Modelo PMIX",
                     ),
                     hr(),
                     selectInput ("nSerie", "Serie a ser analisada:", choices = 1:50, selected = 50),
-                    shinyjs::hidden(
-                      span(id = "armazenando_msg", "Armazenando..."),
-                      div(id = "error_armazenar",
-                          div(br(), tags$b("Error: "), span(id = "error_msg_armazenar"))
-                      )
-                    ),
                     tabsetPanel (
                       tabPanel("Tabela avaliacoes",
                                br ( ),
@@ -107,10 +101,16 @@ TabPMIX = tabPanel ("Modelo PMIX",
                       )
                     ),
                     hr(),
-                    p("AJUSTE E VERIFIQUE O VALOR DO VOLUME ANTES DE ARMAZENAR A SERIE."),
                     fluidRow( 
-                      column(width = 2,actionButton("armazenarBD","Armazenar",class = "btn-primary")),
-                      column(width = 2,downloadButton ("downloadSerie", "Download Serie", icon ("save")))
+                      column(width = 4,
+                             actionButton("armazenarBD","Armazenar",class = "btn-primary"),
+                             shinyjs::hidden(
+                               span(id = "armazenando_msg", "Armazenando..."),
+                               div(id = "error_armazenar",
+                                   div(br(), tags$b("Error: "), span(id = "error_msg_armazenar"))
+                               )
+                             )),
+                      column(width = 4,downloadButton ("downloadSerie", "Download Serie", icon ("save")))
                     )
                 )
               )
