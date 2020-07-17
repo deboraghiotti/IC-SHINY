@@ -11,6 +11,24 @@
 
 library(DT)
 
+# a custom table container
+sketch = htmltools::withTags(table(
+  class = 'display',
+  thead(
+    tr(
+      th(rowspan = 2, 'Mes',class = 'dt-center'),
+      th(colspan = 2, 'Media',class = 'dt-center'),
+      th(colspan = 2, 'Desvio-Padrao',class = 'dt-center'),
+      th(colspan = 2, 'Curtose',class = 'dt-center'),
+      th(colspan = 2, 'Assimetria',class = 'dt-center'),
+      th(colspan = 2, 'Coef. de Variacao',class = 'dt-center'),
+    ),
+    tr(
+      lapply(rep(c('Hist', 'Sint'), 5), th)
+    )
+  )
+))
+
 avaliacaoMensalOutput <- function(id){
   
   # Criado um namespace com o id
@@ -34,12 +52,18 @@ avaliacaoMensal <- function(input,output,session,serieHist,serieSint){
   assimetriaSint = reactive(apply(serieSint(),2,skewness))
   coefVarSint = reactive(desvioSint()/mediaSint())
   
+  mediaHist = reactive(apply (serieHist(), 2, mean))
+  desvioHist = reactive(apply (serieHist(), 2, sd))
+  kurtHist = reactive(apply(serieHist(),2,kurtosis))
+  assimetriaHist = reactive(apply(serieHist(),2,skewness))
+  coefVarHist = reactive(desvioHist()/mediaHist())
+  
   avaliacaoSint = reactive({
     avaliacao = data.frame (mediaSint(),desvioSint(),kurtSint(),assimetriaSint(),coefVarSint())
     colnames(avaliacao) = c("mediaSint","desvioSint","kurtSint","assimetriaSint","coefVarSint")
     rownames (avaliacao) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
   })
-
+  
   output$graficoSerie = renderPlot ({
       inicializaGraficoSERIE(serieHist())
       graficoSERIE (serieHist(), 'cornflowerblue')
@@ -47,13 +71,15 @@ avaliacaoMensal <- function(input,output,session,serieHist,serieSint){
   })
   
   output$tabelaAvaliacao = renderDataTable ({
-      mediaHist = reactive(apply (serieHist(), 2, mean))
-      desvioHist = reactive(apply (serieHist(), 2, sd))
       
-      medidas = round(data.frame (mediaHist(), mediaSint(), desvioHist(), desvioSint(),kurtSint(),assimetriaSint(),coefVarSint()),digits = 5)
+      medidas = round(data.frame (mediaHist(), mediaSint(), desvioHist(), desvioSint(),kurtHist(),kurtSint(),assimetriaHist(),
+                                  assimetriaSint(),coefVarHist(),coefVarSint()),digits = 3)
       rownames (medidas) = c ("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
-      colnames (medidas) = c ("Media Historica", "Media Sintetica", "Desvio-padrao Historico", "Desvio-padrao Sintetico","Indice Kurt","Assimetria","Coeficiente de Variacao")
-      datatable (medidas)
+      datatable (medidas,container = sketch,options = list(
+        columnDefs = list(
+          list(className = "dt-center", targets = "_all")
+        )
+      ))
   })
   
   output$downloadAvaliacao = downloadHandler (
