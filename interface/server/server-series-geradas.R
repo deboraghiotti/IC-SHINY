@@ -266,3 +266,6 @@ observeEvent(input$limpar_sd_button,{
   shinyjs::hide("volume_sd_panel")
   shinyjs::hide("soma_sd_panel")
 })
+
+
+

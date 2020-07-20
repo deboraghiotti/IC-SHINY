@@ -82,7 +82,8 @@ TabSerieGeradas = tabPanel("Series Geradas",
                                    fluidRow(
                                      column(12,
                                             actionButton("limpar_ss_button", "   Limpar   ", class = "btn-primary"),
-                                            actionButton("delete_ss_button", "   Deletar   ", class = "btn-primary",style="background-color:#ff0000;border-color: #ff0000")
+                                            actionButton("delete_ss_button", "   Deletar   ", class = "btn-primary",
+                                                          style="background-color:#ff0000;border-color: #ff0000")
                                      )
                                    )
                                )
@@ -160,11 +161,95 @@ TabSerieGeradas = tabPanel("Series Geradas",
                                    fluidRow(
                                      column(12,
                                             actionButton("limpar_sd_button", "Limpar", class = "btn-primary"),
-                                            actionButton("delete_sd_button", "   Deletar   ", class = "btn-primary",style="background-color:#ff0000;border-color: #ff0000")
+                                            actionButton("delete_sd_button", "   Deletar   ", class = "btn-primary",
+                                                         style="background-color:#ff0000;border-color: #ff0000")
                                      )
                                    )
                                )
                              )
+                    ),
+                    tabPanel("Series Arquivada",
+                             br(),
+                             radioButtons ("tipoSerieArquivado", label = "Tipo da Serie",
+                                           choices = list ("Anual" = 1,
+                                                           "Mensal" = 2),
+                                           selected = 1,inline=TRUE),
+                             hr(),
+                             fluidRow(
+                                column(4,fileInput ("serieHistArquivado", "Series Historica",
+                                                    multiple = TRUE,
+                                                    accept = c ("text/csv",
+                                                                "text/comma-separated-values,text/plain",
+                                                                ".csv"))),
+                                column(4,fileInput ("serieSintArquivado", "Series Sintetica:",
+                                                    multiple = TRUE,
+                                                    accept = c ("text/csv",
+                                                                "text/comma-separated-values,text/plain",
+                                                                ".csv")))
+                             ),
+                             fluidRow(
+                               column(4,actionButton("selecionar_arquivado_button","Iniciar!")),
+                               column(4,actionButton("limpar_arquivado_button", "Limpar", class = "btn-primary",
+                                                      style="background-color:#ff0000;border-color: #ff0000"))
+                             ),
+                             hr(),
+                             conditionalPanel(condition ="input.tipoSerieArquivado == 1",
+                                              shinyjs::hidden(
+                                                div(id = "resultadosArquivado",
+                                                    tabsetPanel(
+                                                      tabPanel("Avaliacoes",
+                                                               br(),
+                                                               # Module avaliacaoMensal
+                                                               avaliacaoAnualOutput("Arquivado1")
+                                                      ),
+                                                      tabPanel("Grafico FAC Anuais",
+                                                               br ( ),
+                                                               # Module facAnual
+                                                               facAnualOutput("Arquivado1")
+                                                               
+                                                      ),
+                                                      tabPanel("Medidas",
+                                                               br(),
+                                                               volumeOutput("Arquivado1"),
+                                                               hr(),
+                                                               h4(strong("Coeficiente Hurst")),
+                                                               coeficienteHurstOutput("Arquivado-Anual1")
+                                                      )
+                                                    )
+                                                )
+                                              )
+                                ),
+                              conditionalPanel(condition ="input.tipoSerieArquivado == 2",
+                                               shinyjs::hidden(
+                                                 div(id = "resultadosArquivado",
+                                                   tabsetPanel(
+                                                     tabPanel("Avaliacoes",
+                                                              br(),
+                                                              avaliacaoMensalOutput("Arquivado2")
+                                                    ),
+                                                     tabPanel("Grafico FAC Anuais",
+                                                              br(),
+                                                              facAnualOutput("Arquivado2")
+                                                              
+                                                     ),
+                                                    tabPanel("Graficos FAC mensais",
+                                                             br ( ),
+                                                             facMensalOutput("Arquivado2")
+                                                    ),
+                                                    tabPanel("Medidas",
+                                                             br(),
+                                                             volumeOutput("Arquivado2"),
+                                                             hr(),
+                                                             h4(strong("Coeficiente Hurst")),
+                                                             fluidRow(
+                                                               column(6,coeficienteHurstOutput("Arquivado-Mensal2")),
+                                                               column(6,coeficienteHurstOutput("Arquivado-Anual2"))
+                                                             )
+                                                    )
+                                                 )
+                                             )
+                                     )
+                              )
                     )
                   )
            )
