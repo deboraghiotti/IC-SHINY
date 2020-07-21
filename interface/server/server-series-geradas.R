@@ -267,5 +267,69 @@ observeEvent(input$limpar_sd_button,{
   shinyjs::hide("soma_sd_panel")
 })
 
+# TAB Serie Arquivada
 
+observeEvent(input$tipoSerieArquivado,{
+  if(input$tipoSerieArquivado == 1){
+    hideTab(inputId = "tabsArquivado", target = "1")
+  }else{
+    showTab(inputId = "tabsArquivado", target = "1")
+  }
+})
 
+serieHistArquivado = reactive({
+  input$selecionar_arquivado_button
+  serieH = data.frame(read.csv2(input$serieHistArquivado$datapath,header = TRUE))
+  colnames(serieH)=c("periodo","valor")
+  serieH = as.data.table(serieH)
+  serieHist = div_mensais(serieH)
+  return(serieHist)
+})
+
+serieHistAnualArquivado <- reactive({
+  serieHist_Anual = apply (serieHistArquivado(), 1, sum)
+  return(serieHist_Anual)
+})
+
+serieSintArquivado = reactive({
+  input$selecionar_arquivado_button
+  serieSS = data.frame(read.csv(input$serieSintArquivado$datapath,sep=";",dec=",",header=TRUE))
+  if(input$tipoSerieArquivado == 1){
+    return(as.matrix(serieSS))
+  }
+  print(head(serieSS))
+  return(serieSS)
+})
+
+serieSintAnualArquivado = reactive({
+  if(input$tipoSerieArquivado == 2){
+    serieSint_Anual = apply (serieSintArquivado(), 1, sum)  
+  }
+})
+
+observeEvent(input$selecionar_arquivado_button,{
+  
+  shinyjs::disable("selecionar_arquivado_button")
+  shinyjs::enable("limpar_arquivado_button")
+  shinyjs::show("resultadosArquivado")
+  
+  if(input$tipoSerieArquivado == 1){
+    avaliacaoAnualArquivado <- callModule(avaliacaoAnual,"Arquivado",serieHistAnualArquivado,serieSintArquivado)
+    acfAnualArquivado <- callModule(facAnual,"Arquivado",serieHistAnualArquivado,serieSintArquivado)
+    hurstAnualArquivado <- callModule(coeficienteHurst,"Arquivado-Anual","Anual",serieHistAnualArquivado,serieSintArquivado)
+  }else{
+    avaliacaoMensalArquivado <- callModule(avaliacaoMensal,"Arquivado",serieHistArquivado,serieSintArquivado)
+    acfAnualArquivado <- callModule(facAnual,"Arquivado",serieHistAnualArquivado,serieSintAnualArquivado)
+    acfMensalArquivado <- callModule(facMensal,"Arquivado",serieHistArquivado,serieSintArquivado)
+    hurstAnualArquivado <- callModule(coeficienteHurst,"Arquivado-Anual","Anual",serieHistAnualArquivado,serieSintAnualArquivado)
+    hurstMensalArquivado <- callModule(coeficienteHurst,"Arquivado-Mensal","Mensal",
+                                          reactive(as.matrix(serieHistArquivado())),reactive(as.matrix(serieSintArquivado())))
+  }
+  volumeArquivado <- callModule(volume,"Arquivado","TRUE",reactive(as.matrix(serieHistArquivado())),reactive(as.matrix(serieSintArquivado())))
+})
+
+observeEvent(input$limpar_arquivado_button,{
+  shinyjs::hide("resultadosArquivado")
+  shinyjs::enable("selecionar_arquivado_button")
+  
+})

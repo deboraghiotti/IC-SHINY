@@ -130,7 +130,6 @@ avaliacaoAnual <- function(input,output,session,serieHistAnual,serieSintAnual){
   assimetriaSint = reactive(skewness(serieSintAnual()))
   coefVarSint = reactive(desvioSint()/mediaSint())
   
-  
   mediaHist = reactive(mean (serieHistAnual()))
   desvioHist = reactive(sd (serieHistAnual()))
   kurtHist = reactive(kurtosis(serieHistAnual()))

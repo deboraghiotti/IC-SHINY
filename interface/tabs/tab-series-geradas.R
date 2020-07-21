@@ -193,63 +193,45 @@ TabSerieGeradas = tabPanel("Series Geradas",
                                                       style="background-color:#ff0000;border-color: #ff0000"))
                              ),
                              hr(),
-                             conditionalPanel(condition ="input.tipoSerieArquivado == 1",
-                                              shinyjs::hidden(
-                                                div(id = "resultadosArquivado",
-                                                    tabsetPanel(
-                                                      tabPanel("Avaliacoes",
-                                                               br(),
-                                                               # Module avaliacaoMensal
-                                                               avaliacaoAnualOutput("Arquivado1")
-                                                      ),
-                                                      tabPanel("Grafico FAC Anuais",
-                                                               br ( ),
-                                                               # Module facAnual
-                                                               facAnualOutput("Arquivado1")
+                             shinyjs::hidden(
+                              div(id = "resultadosArquivado",
+                                tabsetPanel(
+                                  tabPanel("Avaliacoes",
+                                    br(),
+                                    # Module avaliacaoMensal
+                                    conditionalPanel(condition ="input.tipoSerieArquivado == 1",
+                                      avaliacaoAnualOutput("Arquivado")
+                                    ),
+                                    conditionalPanel(condition ="input.tipoSerieArquivado == 2",
+                                      avaliacaoMensalOutput("Arquivado")
+                                    )
+                                  ),
+                                  tabPanel("Grafico FAC Anuais",
+                                    br ( ),
+                                    # Module facAnual
+                                    facAnualOutput("Arquivado")
                                                                
-                                                      ),
-                                                      tabPanel("Medidas",
-                                                               br(),
-                                                               volumeOutput("Arquivado1"),
-                                                               hr(),
-                                                               h4(strong("Coeficiente Hurst")),
-                                                               coeficienteHurstOutput("Arquivado-Anual1")
-                                                      )
-                                                    )
-                                                )
-                                              )
-                                ),
-                              conditionalPanel(condition ="input.tipoSerieArquivado == 2",
-                                               shinyjs::hidden(
-                                                 div(id = "resultadosArquivado",
-                                                   tabsetPanel(
-                                                     tabPanel("Avaliacoes",
-                                                              br(),
-                                                              avaliacaoMensalOutput("Arquivado2")
-                                                    ),
-                                                     tabPanel("Grafico FAC Anuais",
-                                                              br(),
-                                                              facAnualOutput("Arquivado2")
-                                                              
-                                                     ),
-                                                    tabPanel("Graficos FAC mensais",
-                                                             br ( ),
-                                                             facMensalOutput("Arquivado2")
-                                                    ),
-                                                    tabPanel("Medidas",
-                                                             br(),
-                                                             volumeOutput("Arquivado2"),
-                                                             hr(),
-                                                             h4(strong("Coeficiente Hurst")),
-                                                             fluidRow(
-                                                               column(6,coeficienteHurstOutput("Arquivado-Mensal2")),
-                                                               column(6,coeficienteHurstOutput("Arquivado-Anual2"))
-                                                             )
-                                                    )
-                                                 )
-                                             )
-                                     )
+                                  ),
+                                  tabPanel("Graficos FAC mensais",
+                                    br ( ),
+                                    facMensalOutput("Arquivado"),
+                                    value = 1
+                                  ),
+                                  tabPanel("Medidas",
+                                    br(),
+                                    volumeOutput("Arquivado"),
+                                    hr(),
+                                    h4(strong("Coeficiente Hurst")),
+                                    fluidRow(
+                                      conditionalPanel(condition ="input.tipoSerieArquivado == 2",
+                                        column(6,coeficienteHurstOutput("Arquivado-Mensal"))),
+                                      column(6,coeficienteHurstOutput("Arquivado-Anual"))
+                                    )
+                                  ),
+                                  id = "tabsArquivado"
+                                )
                               )
+                            )
                     )
                   )
            )
